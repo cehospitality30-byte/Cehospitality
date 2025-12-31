@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Phone, Mail, Clock, MapPin, Send, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useCreateContact } from '@/hooks/useContacts';
 import SEO from '@/components/SEO';
+import { Loader2 } from 'lucide-react';
 
 // Contact Page Schema
 const contactSchema = {
@@ -33,21 +34,31 @@ const contactSchema = {
 };
 
 const Contact = () => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: '',
+    phone: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createContact = useCreateContact();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting Cozmo Cafe Hyderabad. We'll get back to you soon!",
-    });
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    try {
+      await createContact.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        phone: formData.phone || undefined,
+        status: 'unread',
+      });
+      setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
+    } catch (error) {
+      // Error handled by mutation
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -208,9 +219,24 @@ const Contact = () => {
                   className="bg-background border-border focus:border-primary resize-none"
                 />
               </div>
-              <Button type="submit" variant="gold" size="xl" className="w-full">
-                <Send className="w-5 h-5 mr-2" />
-                Send Message
+              <Button 
+                type="submit" 
+                variant="gold" 
+                size="xl" 
+                className="w-full"
+                disabled={createContact.isPending}
+              >
+                {createContact.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-2" />
+                    Send Message
+                  </>
+                )}
               </Button>
             </form>
           </div>

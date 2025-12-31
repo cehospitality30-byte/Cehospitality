@@ -54,11 +54,38 @@ npm run dev
 
 This project is built with:
 
+**Frontend:**
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+
+**Backend:**
+- Express.js
+- MongoDB with Mongoose
+- TypeScript
+- RESTful API
+
+## MongoDB Setup
+
+This project includes a MongoDB backend server. See [SETUP.md](./SETUP.md) for detailed setup instructions.
+
+**Quick Start:**
+```bash
+# 1. Install MongoDB (local or use MongoDB Atlas)
+# 2. Setup backend server
+cd server
+npm install
+cp .env.example .env
+# Edit .env with your MongoDB connection string
+npm run dev
+
+# 3. Start frontend (in root directory)
+npm run dev
+```
+
+The backend server runs on `http://localhost:5000` and the frontend on `http://localhost:8080`.
 
 ## How can I deploy this project?
 

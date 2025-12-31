@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, Users, Send } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Calendar, Clock, Users, Send, Loader2 } from 'lucide-react';
+import { useCreateBooking } from '@/hooks/useBookings';
 
 export function BookingForm() {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,21 +16,33 @@ export function BookingForm() {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createBooking = useCreateBooking();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Reservation Request Received",
-      description: "We'll confirm your booking shortly via email or phone.",
-    });
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      date: '',
-      time: '',
-      guests: '',
-      message: '',
-    });
+    try {
+      await createBooking.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        date: new Date(formData.date),
+        time: formData.time,
+        guests: parseInt(formData.guests),
+        message: formData.message || undefined,
+        status: 'pending',
+      });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        date: '',
+        time: '',
+        guests: '',
+        message: '',
+      });
+    } catch (error) {
+      // Error handled by mutation
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -135,9 +146,24 @@ export function BookingForm() {
         />
       </div>
 
-      <Button type="submit" variant="gold" size="xl" className="w-full">
-        <Send className="w-5 h-5 mr-2" />
-        Request Reservation
+      <Button 
+        type="submit" 
+        variant="gold" 
+        size="xl" 
+        className="w-full"
+        disabled={createBooking.isPending}
+      >
+        {createBooking.isPending ? (
+          <>
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            Submitting...
+          </>
+        ) : (
+          <>
+            <Send className="w-5 h-5 mr-2" />
+            Request Reservation
+          </>
+        )}
       </Button>
     </form>
   );

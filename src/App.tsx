@@ -27,6 +27,20 @@ import MainCoursePage from "./pages/menu/MainCoursePage";
 import DessertsPage from "./pages/menu/DessertsPage";
 import ChefSpecialsPage from "./pages/menu/ChefSpecialsPage";
 
+// Admin pages
+import AdminLogin from "./pages/admin/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import MenuManagement from "./pages/admin/MenuManagement";
+import ServicesManagement from "./pages/admin/ServicesManagement";
+import GalleryManagement from "./pages/admin/GalleryManagement";
+import BookingsInbox from "./pages/admin/BookingsInbox";
+import ContactInbox from "./pages/admin/ContactInbox";
+import OffersManagement from "./pages/admin/OffersManagement";
+import ContentManagement from "./pages/admin/ContentManagement";
+import LeadershipManagement from "./pages/admin/LeadershipManagement";
+import Settings from "./pages/admin/Settings";
+import { ProtectedRoute } from "./components/admin/ProtectedRoute";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -54,6 +68,90 @@ const App = () => (
           <Route path="/offers" element={<Offers />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/contact" element={<Contact />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/menu"
+            element={
+              <ProtectedRoute>
+                <MenuManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/services"
+            element={
+              <ProtectedRoute>
+                <ServicesManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/gallery"
+            element={
+              <ProtectedRoute>
+                <GalleryManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute>
+                <BookingsInbox />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/contacts"
+            element={
+              <ProtectedRoute>
+                <ContactInbox />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/offers"
+            element={
+              <ProtectedRoute>
+                <OffersManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/content"
+            element={
+              <ProtectedRoute>
+                <ContentManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/leadership"
+            element={
+              <ProtectedRoute>
+                <LeadershipManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
