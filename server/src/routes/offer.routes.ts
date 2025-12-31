@@ -5,7 +5,7 @@ import { Router } from 'express';
 const router: Router = express.Router();
 
 // Get all offers
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { active } = req.query;
     const query: any = {};
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get single offer
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const offer = await Offer.findById(req.params.id);
     if (!offer) {
@@ -35,7 +35,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create offer
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const offer = new Offer(req.body);
     await offer.save();
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update offer
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     const offer = await Offer.findByIdAndUpdate(
       req.params.id,
@@ -63,7 +63,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete offer
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const offer = await Offer.findByIdAndDelete(req.params.id);
     if (!offer) {

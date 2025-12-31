@@ -25,13 +25,22 @@ async function testConnection() {
     console.log(`🌐 Host: ${mongoose.connection.host}`);
     
     // Test ping
-    await mongoose.connection.db.admin().command({ ping: 1 });
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.admin().command({ ping: 1 });
+    } else {
+      throw new Error('Database connection not established');
+    }
     console.log('✅ Ping successful!');
     
     // List collections
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    let collections;
+    if (mongoose.connection.db) {
+      collections = await mongoose.connection.db.listCollections().toArray();
+    } else {
+      throw new Error('Database connection not established');
+    }
     console.log(`\n📁 Collections (${collections.length}):`);
-    collections.forEach(col => {
+    collections.forEach((col: any) => {
       console.log(`   - ${col.name}`);
     });
     

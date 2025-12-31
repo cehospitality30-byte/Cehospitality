@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import Admin from '../models/Admin';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
 
-const router: express.Router = express.Router();
+const router: Router = express.Router();
 
 // Admin login
 router.post('/login', async (req: Request, res: Response) => {

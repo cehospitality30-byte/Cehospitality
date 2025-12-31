@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import MenuItem from '../models/MenuItem.js';
@@ -96,7 +96,7 @@ async function seedDatabase() {
     console.log('🌱 Starting database seeding...\n');
     console.log('🔌 Connecting to MongoDB...');
 
-    await mongoose.connect(mongoURI, connectionOptions);
+    await mongoose.connect(mongoURI!, connectionOptions);
     console.log('✅ Connected to MongoDB\n');
 
     console.log('🗑️  Clearing existing data...');

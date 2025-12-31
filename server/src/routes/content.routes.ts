@@ -5,7 +5,7 @@ import { Router } from 'express';
 const router: Router = express.Router();
 
 // Get all content
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { section } = req.query;
     const query: any = {};
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get content by section
-router.get('/section/:section', async (req, res) => {
+router.get('/section/:section', async (req: Request, res: Response) => {
   try {
     const contents = await Content.find({ section: req.params.section });
     const contentMap: Record<string, string> = {};
@@ -36,7 +36,7 @@ router.get('/section/:section', async (req, res) => {
 });
 
 // Update or create content
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const { section, key, value } = req.body;
     
@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
 });
 
 // Bulk update content
-router.put('/bulk', async (req, res) => {
+router.put('/bulk', async (req: Request, res: Response) => {
   try {
     const { section, data } = req.body;
     

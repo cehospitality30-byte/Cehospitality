@@ -6,7 +6,7 @@ import { Router } from 'express';
 const router: Router = express.Router();
 
 // Get all leaders
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const leaders = await Leader.find().sort({ createdAt: -1 });
     res.json(leaders);
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get single leader
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const leader = await Leader.findById(req.params.id);
     if (!leader) {

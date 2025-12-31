@@ -1,10 +1,39 @@
 import mongoose from 'mongoose';
 import { config } from './env.js';
 
+// For serverless environments, maintain a cached connection
+const globalAny: any = global;
+if (!globalAny.mongoose) {
+  globalAny.mongoose = { conn: null, promise: null };
+}
+
 export const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = config.mongoUri;
 
+    // In serverless, reuse existing connection if available
+    if (config.nodeEnv === 'production') {
+      if (globalAny.mongoose.conn) {
+        console.log('✅ Using existing MongoDB connection');
+        return globalAny.mongoose.conn;
+      }
+      if (!globalAny.mongoose.promise) {
+        console.log('🔌 Connecting to MongoDB for the first time in serverless...');
+        const options = {
+          serverApi: {
+            version: '1' as const,
+            strict: true,
+            deprecationErrors: true,
+          },
+        };
+        globalAny.mongoose.promise = mongoose.connect(mongoURI, options);
+      }
+      globalAny.mongoose.conn = await globalAny.mongoose.promise;
+      console.log('✅ MongoDB Connected Successfully in serverless mode');
+      return;
+    }
+
+    // For development, use direct connection
     const options = {
       serverApi: {
         version: '1' as const,

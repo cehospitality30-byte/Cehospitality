@@ -5,7 +5,7 @@ import { Router } from 'express';
 const router: Router = express.Router();
 
 // Get all bookings
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, date } = req.query;
     const query: any = {};
@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get single booking
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findById(req.params.id);
     if (!booking) {
@@ -39,7 +39,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create booking
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const booking = new Booking(req.body);
     await booking.save();
@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update booking
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
@@ -67,7 +67,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete booking
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) {

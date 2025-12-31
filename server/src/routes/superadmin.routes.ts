@@ -1,5 +1,4 @@
-import * as express from 'express';
-import { Request, Response, Router } from 'express';
+import express, { Request, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin';
 import { config } from '../config/env';
@@ -13,7 +12,7 @@ interface JwtPayload {
 const router: Router = express.Router();
 
 // Create super admin (only first super admin can be created without authentication)
-router.post('/superadmin', async (req, res) => {
+router.post('/superadmin', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = req.body;
 
@@ -63,7 +62,7 @@ router.post('/superadmin', async (req, res) => {
 });
 
 // Create admin (only super admin can do this)
-router.post('/admin', async (req, res) => {
+router.post('/admin', async (req: Request, res: Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -115,7 +114,7 @@ router.post('/admin', async (req, res) => {
 });
 
 // Get all admins (only super admin can do this)
-router.get('/admins', async (req, res) => {
+router.get('/admins', async (req: Request, res: Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -142,7 +141,7 @@ router.get('/admins', async (req, res) => {
 });
 
 // Delete admin (only super admin can do this)
-router.delete('/admin/:id', async (req, res) => {
+router.delete('/admin/:id', async (req: Request, res: Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
