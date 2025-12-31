@@ -1,14 +1,23 @@
 {
   "version": 2,
-  "name": "cehospitality-frontend",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "https://server.cehospitalitygroup.com/api/:path*"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://server.cehospitalitygroup.com/api/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "(.*)",
+      "dest": "/index.html"
     }
-  ]
+  ],
+  "public": true
 }
