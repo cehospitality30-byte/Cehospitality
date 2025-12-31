@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { menuApi } from '@/lib/api';
+import { menuApi, uploadImageToCloudinary } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function useMenuItems(params?: { category?: string; search?: string }) {
@@ -21,7 +21,16 @@ export function useCreateMenuItem() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: any) => menuApi.create(data),
+    mutationFn: async (data: any) => {
+      // If there's a file to upload, upload it to Cloudinary first
+      if (data.imageFile) {
+        const uploadResult = await uploadImageToCloudinary(data.imageFile, 'menu');
+        data.image = uploadResult.url;
+        data.publicId = uploadResult.publicId;
+        delete data.imageFile; // Remove the file object as it's not needed in the API call
+      }
+      return menuApi.create(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
       toast.success('Menu item created successfully');
@@ -36,7 +45,16 @@ export function useUpdateMenuItem() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => menuApi.update(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      // If there's a file to upload, upload it to Cloudinary first
+      if (data.imageFile) {
+        const uploadResult = await uploadImageToCloudinary(data.imageFile, 'menu');
+        data.image = uploadResult.url;
+        data.publicId = uploadResult.publicId;
+        delete data.imageFile; // Remove the file object as it's not needed in the API call
+      }
+      return menuApi.update(id, data);
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
       queryClient.invalidateQueries({ queryKey: ['menuItem', variables.id] });

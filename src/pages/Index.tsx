@@ -180,7 +180,7 @@ const Index = () => {
           <DirectorCard 
             name="Samuel Charles"
             role="Founder & CEO"
-            description="With over 15 years in luxury hospitality, Alexander leads the group's vision for expansion and excellence."
+            description="With over 5 years in luxury hospitality, Alexander leads the group's vision for expansion and excellence."
           />
           <DirectorCard 
             name="Padma Vijaya"

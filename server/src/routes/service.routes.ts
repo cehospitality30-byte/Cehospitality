@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Service from '../models/Service.js';
+import { Router } from 'express';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Get all services
 router.get('/', async (req, res) => {

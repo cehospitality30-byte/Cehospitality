@@ -79,7 +79,7 @@ export const businessSchema = {
   "servesCuisine": ["Continental", "Italian", "Indian", "Cafe", "Beverages"],
   "hasMenu": "https://cozmocafe.com/menu",
   "acceptsReservations": true,
-  "image": "https://cozmocafe.com/images/lounge.jpg",
+  "image": "/og.png",
   "sameAs": [
     "https://www.facebook.com/cozmocafe",
     "https://www.instagram.com/cozmocafe",
@@ -125,7 +125,7 @@ export const SEO = ({
   description, 
   keywords = LOCAL_SEO_KEYWORDS.primary.join(', '),
   canonicalUrl,
-  ogImage = '/og-image.jpg',
+  ogImage = '/og.png',
   structuredData
 }: SEOProps) => {
   return (

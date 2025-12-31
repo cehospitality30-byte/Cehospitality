@@ -23,9 +23,12 @@ import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useOffers } from '@/hooks/useOffers';
+import { offerApi } from '@/lib/api';
 
 interface Offer {
-  id: string;
+  _id?: string;
+  id?: string;
   title: string;
   description: string;
   discount?: string;
@@ -35,31 +38,8 @@ interface Offer {
   isActive: boolean;
 }
 
-const mockOffers: Offer[] = [
-  {
-    id: '1',
-    title: 'Weekend Special',
-    description: '20% off on all beverages every weekend',
-    discount: '20%',
-    code: 'WEEKEND20',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    isActive: true,
-  },
-  {
-    id: '2',
-    title: 'Happy Hour',
-    description: 'Buy 2 Get 1 Free on mocktails (4 PM - 7 PM)',
-    discount: '33%',
-    code: 'HAPPYHOUR',
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    isActive: true,
-  },
-];
-
 export default function OffersManagement() {
-  const [offers, setOffers] = useState<Offer[]>(mockOffers);
+  const { data: offers = [], isLoading, refetch } = useOffers() as { data: Offer[]; isLoading: boolean; refetch: () => void; };
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
@@ -97,29 +77,33 @@ export default function OffersManagement() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setOffers(offers.filter((offer) => offer.id !== id));
-    toast.success('Offer deleted');
+  const handleDelete = async (id: string) => {
+    try {
+      await offerApi.delete(id);
+      toast.success('Offer deleted');
+      refetch();
+    } catch (error) {
+      console.error('Error deleting offer:', error);
+      toast.error('Failed to delete offer');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingOffer) {
-      setOffers(
-        offers.map((offer) =>
-          offer.id === editingOffer.id ? { ...formData, id: editingOffer.id } as Offer : offer
-        )
-      );
-      toast.success('Offer updated');
-    } else {
-      const newOffer: Offer = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Offer;
-      setOffers([...offers, newOffer]);
-      toast.success('Offer created');
+    try {
+      if (editingOffer) {
+        await offerApi.update(editingOffer._id || editingOffer.id || '', formData as Offer);
+        toast.success('Offer updated');
+      } else {
+        await offerApi.create(formData);
+        toast.success('Offer created');
+      }
+      setIsDialogOpen(false);
+      refetch();
+    } catch (error) {
+      console.error('Error saving offer:', error);
+      toast.error('Failed to save offer');
     }
-    setIsDialogOpen(false);
   };
 
   return (

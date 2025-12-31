@@ -39,7 +39,10 @@ import OffersManagement from "./pages/admin/OffersManagement";
 import ContentManagement from "./pages/admin/ContentManagement";
 import LeadershipManagement from "./pages/admin/LeadershipManagement";
 import Settings from "./pages/admin/Settings";
+import Setup from "./pages/admin/Setup";
+import SuperAdmin from "./pages/admin/SuperAdmin";
 import { ProtectedRoute } from "./components/admin/ProtectedRoute";
+
 
 const queryClient = new QueryClient();
 
@@ -48,7 +51,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />
@@ -68,8 +71,9 @@ const App = () => (
           <Route path="/offers" element={<Offers />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/contact" element={<Contact />} />
-          
+
           {/* Admin Routes */}
+          <Route path="/setup" element={<Setup />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
@@ -151,7 +155,15 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          
+          <Route
+            path="/admin/superadmin"
+            element={
+              <ProtectedRoute>
+                <SuperAdmin />
+              </ProtectedRoute>
+            }
+          />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

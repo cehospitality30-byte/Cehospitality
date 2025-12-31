@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { galleryApi } from '@/lib/api';
+import { galleryApi, uploadImageToCloudinary } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function useGalleryImages(category?: string) {
@@ -21,7 +21,16 @@ export function useCreateGalleryImage() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: any) => galleryApi.create(data),
+    mutationFn: async (data: any) => {
+      // If there's a file to upload, upload it to Cloudinary first
+      if (data.imageFile) {
+        const uploadResult = await uploadImageToCloudinary(data.imageFile, 'gallery');
+        data.url = uploadResult.url;
+        data.publicId = uploadResult.publicId;
+        delete data.imageFile; // Remove the file object as it's not needed in the API call
+      }
+      return galleryApi.create(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gallery'] });
       toast.success('Image uploaded successfully');

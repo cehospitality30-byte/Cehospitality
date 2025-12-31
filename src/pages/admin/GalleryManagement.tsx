@@ -13,81 +13,69 @@ import {
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useGalleryImages, useCreateGalleryImage, useDeleteGalleryImage } from '@/hooks/useGallery';
 
 interface GalleryImage {
-  id: string;
+  _id?: string;
+  id?: string;
   url: string;
   title?: string;
   category?: string;
-  uploadedAt: string;
+  publicId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  imageFile?: File;
 }
 
-const mockImages: GalleryImage[] = [
-  {
-    id: '1',
-    url: '/src/assets/hero-lounge.jpg',
-    title: 'Lounge Interior',
-    category: 'Interior',
-    uploadedAt: '2024-01-10',
-  },
-  {
-    id: '2',
-    url: '/src/assets/signature-coffee.jpg',
-    title: 'Signature Coffee',
-    category: 'Food & Beverages',
-    uploadedAt: '2024-01-11',
-  },
-  {
-    id: '3',
-    url: '/src/assets/dessert.jpg',
-    title: 'Dessert Collection',
-    category: 'Food & Beverages',
-    uploadedAt: '2024-01-12',
-  },
-];
-
 export default function GalleryManagement() {
-  const [images, setImages] = useState<GalleryImage[]>(mockImages);
+  const { data: images = [], isLoading, refetch } = useGalleryImages() as { data: GalleryImage[], isLoading: boolean, refetch: () => void };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<GalleryImage>>({
     title: '',
     category: '',
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const createMutation = useCreateGalleryImage();
+  const deleteMutation = useDeleteGalleryImage();
 
   const handleDelete = (id: string) => {
-    setImages(images.filter((img) => img.id !== id));
-    toast.success('Image deleted');
+    if (confirm('Are you sure you want to delete this image?')) {
+      deleteMutation.mutate(id);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setFormData({ ...formData, url: event.target.result as string });
-        }
-      };
-      reader.readAsDataURL(e.target.files[0]);
+      setImageFile(e.target.files[0]);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedFile || formData.url) {
-      const newImage: GalleryImage = {
-        id: Date.now().toString(),
-        url: formData.url || URL.createObjectURL(selectedFile!),
-        title: formData.title,
-        category: formData.category,
-        uploadedAt: new Date().toISOString(),
-      };
-      setImages([...images, newImage]);
-      toast.success('Image uploaded');
+    
+    if (!imageFile) {
+      toast.error('Please select an image to upload');
+      return;
+    }
+    
+    try {
+      // Prepare form data
+      const submitData = { ...formData };
+      
+      // Add image file to the data if it exists
+      if (imageFile) {
+        submitData.imageFile = imageFile;
+      }
+      
+      await createMutation.mutateAsync(submitData);
+      
       setIsDialogOpen(false);
       setFormData({ title: '', category: '' });
-      setSelectedFile(null);
+      setImageFile(null);
+      
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload image');
     }
   };
 
@@ -127,8 +115,8 @@ export default function GalleryManagement() {
                       <p className="text-sm text-muted-foreground">
                         Click to upload or drag and drop
                       </p>
-                      {selectedFile && (
-                        <p className="text-xs text-muted-foreground mt-2">{selectedFile.name}</p>
+                      {imageFile && (
+                        <p className="text-xs text-muted-foreground mt-2">{imageFile.name}</p>
                       )}
                     </label>
                   </div>
@@ -155,7 +143,7 @@ export default function GalleryManagement() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={!selectedFile && !formData.url}>
+                  <Button type="submit" disabled={!imageFile && !formData.url}>
                     Upload
                   </Button>
                 </div>
@@ -168,7 +156,7 @@ export default function GalleryManagement() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((image) => (
             <div
-              key={image.id}
+              key={image._id || image.id || image.url}
               className="group relative aspect-square rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
             >
               <img
@@ -180,7 +168,7 @@ export default function GalleryManagement() {
                 <Button
                   variant="destructive"
                   size="icon"
-                  onClick={() => handleDelete(image.id)}
+                  onClick={() => handleDelete(image._id || image.id || '')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

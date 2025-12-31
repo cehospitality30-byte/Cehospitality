@@ -7,9 +7,13 @@ async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  // Get token from localStorage
+  const token = localStorage.getItem('token');
+  
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -23,6 +27,35 @@ async function apiRequest<T>(
   }
 
   return response.json();
+}
+
+// Function to upload image to Cloudinary
+export async function uploadImageToCloudinary(file: File, entityType: 'menu' | 'gallery' | 'leaders' | 'uploads' = 'uploads'): Promise<{ url: string, publicId: string }> {
+  // Convert file to base64
+  const reader = new FileReader();
+  
+  return new Promise((resolve, reject) => {
+    reader.onload = async () => {
+      const base64Image = reader.result as string;
+      
+      // Upload to backend which will handle Cloudinary upload
+      try {
+        const result: any = await apiRequest('/upload', {
+          method: 'POST',
+          body: JSON.stringify({ image: base64Image, entityType }),
+        });
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+    
+    reader.readAsDataURL(file);
+  });
 }
 
 // Menu Items API
@@ -193,5 +226,26 @@ export const contentApi = {
     method: 'PUT',
     body: JSON.stringify({ section, data }),
   }),
+};
+
+// Admin API
+export const adminApi = {
+  getAll: () => apiRequest('/admins'),
+  create: (data: { email: string; name: string; password: string }) => apiRequest('/admin', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  delete: (id: string) => apiRequest(`/admin/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
+// Auth API
+export const authApi = {
+  login: (data: { email: string; password: string }) => apiRequest('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  verify: () => apiRequest('/auth/verify'),
 };
 

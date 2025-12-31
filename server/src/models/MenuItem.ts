@@ -9,6 +9,7 @@ export interface IMenuItem extends Document {
   isSignature: boolean;
   type: 'beverage' | 'veg' | 'nonveg' | 'mixed';
   image?: string;
+  publicId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +48,10 @@ const MenuItemSchema = new Schema<IMenuItem>(
       enum: ['beverage', 'veg', 'nonveg', 'mixed'],
     },
     image: {
+      type: String,
+      trim: true,
+    },
+    publicId: {
       type: String,
       trim: true,
     },

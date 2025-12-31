@@ -5,6 +5,7 @@ export interface ILeader extends Document {
   role: string;
   description: string;
   image?: string;
+  publicId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,10 @@ const LeaderSchema = new Schema<ILeader>(
       required: true,
     },
     image: {
+      type: String,
+      trim: true,
+    },
+    publicId: {
       type: String,
       trim: true,
     },

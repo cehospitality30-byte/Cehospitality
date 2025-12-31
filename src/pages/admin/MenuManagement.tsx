@@ -41,6 +41,7 @@ interface MenuItem {
   description?: string;
   isSignature: boolean;
   type: 'beverage' | 'veg' | 'nonveg' | 'mixed';
+  imageFile?: File;
 }
 
 export default function MenuManagement() {
@@ -56,8 +57,9 @@ export default function MenuManagement() {
     isSignature: false,
     type: 'beverage',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const { data: items = [], isLoading } = useMenuItems({ search: searchQuery || undefined });
+  const { data: items = [], isLoading } = useMenuItems({ search: searchQuery || undefined }) as { data: MenuItem[], isLoading: boolean };
   const createMutation = useCreateMenuItem();
   const updateMutation = useUpdateMenuItem();
   const deleteMutation = useDeleteMenuItem();
@@ -97,13 +99,21 @@ export default function MenuManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Prepare form data
+      const submitData = { ...formData };
+      
+      // Add image file to the data if it exists
+      if (imageFile) {
+        submitData.imageFile = imageFile;
+      }
+      
       if (editingItem) {
         const id = editingItem._id || editingItem.id;
         if (id) {
-          await updateMutation.mutateAsync({ id, data: formData });
+          await updateMutation.mutateAsync({ id, data: submitData });
         }
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(submitData);
       }
       setIsDialogOpen(false);
       setFormData({
@@ -115,6 +125,7 @@ export default function MenuManagement() {
         isSignature: false,
         type: 'beverage',
       });
+      setImageFile(null); // Reset image file
     } catch (error) {
       // Error handled by mutation
     }
@@ -221,6 +232,19 @@ export default function MenuManagement() {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="image">Image</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setImageFile(e.target.files[0]);
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex items-center space-x-2">

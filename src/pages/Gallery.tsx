@@ -4,26 +4,7 @@ import { Footer } from '@/components/Footer';
 import { Section } from '@/components/Section';
 import { X } from 'lucide-react';
 import SEO from '@/components/SEO';
-
-import heroLounge from '@/assets/hero-lounge.jpg';
-import signatureCoffee from '@/assets/signature-coffee.jpg';
-import mocktail from '@/assets/mocktail.jpg';
-import dessert from '@/assets/dessert.jpg';
-import chefSpecial from '@/assets/chef-special.jpg';
-import starters from '@/assets/starters.jpg';
-
-const galleryImages = [
-  { src: heroLounge, alt: 'Cozmo Cafe Lounge Interior - Best cafe ambiance in Hyderabad', category: 'Interior' },
-  { src: signatureCoffee, alt: 'Signature artisan coffee at Cozmo Cafe Hyderabad', category: 'Food' },
-  { src: mocktail, alt: 'Premium mocktails at best lounge in Banjara Hills Hyderabad', category: 'Beverages' },
-  { src: dessert, alt: 'Delicious desserts at Cozmo Cafe Bistro Lounge Hyderabad', category: 'Food' },
-  { src: chefSpecial, alt: 'Chef special gourmet dishes at premium restaurant Hyderabad', category: 'Food' },
-  { src: starters, alt: 'Gourmet starters and appetizers at Cozmo Cafe Hyderabad', category: 'Food' },
-  { src: heroLounge, alt: 'Evening ambiance at best lounge for couples in Hyderabad', category: 'Interior' },
-  { src: mocktail, alt: 'Cocktail bar and beverages at Cozmo Lounge Hyderabad', category: 'Beverages' },
-];
-
-const categories = ['All', 'Interior', 'Food', 'Beverages'];
+import { useGalleryImages } from '@/hooks/useGallery';
 
 // Gallery Schema
 const gallerySchema = {
@@ -45,10 +26,49 @@ const gallerySchema = {
 const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  const { data: galleryImages = [], isLoading } = useGalleryImages() as { data: Array<{ _id: string; url: string; title?: string; category?: string }>; isLoading: boolean; };
 
+  // Extract unique categories from gallery images
+  const allCategories = ['All', ...new Set(galleryImages.map(img => img.category || 'Uncategorized'))];
+  
   const filteredImages = activeCategory === 'All' 
     ? galleryImages 
-    : galleryImages.filter(img => img.category === activeCategory);
+    : galleryImages.filter(img => (img.category || 'Uncategorized') === activeCategory);
+
+  // Update structured data based on actual images
+  const dynamicGallerySchema = {
+    ...gallerySchema,
+    numberOfItems: galleryImages.length,
+    image: galleryImages.slice(0, 10).map(img => img.url), // Include up to 10 image URLs
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SEO 
+          title="Gallery | Cozmo Cafe Bistro Lounge Hyderabad - Photos & Ambiance"
+          description="Explore the photo gallery of Cozmo Cafe Bistro Lounge Hyderabad. See our beautiful interior, delicious food, refreshing beverages & cozy lounge ambiance. Best cafe photos in Banjara Hills."
+          keywords="cafe gallery Hyderabad, restaurant photos Banjara Hills, lounge ambiance Hyderabad, cafe interior design, food photography Hyderabad, best cafe decor"
+          canonicalUrl="https://cozmocafe.com/gallery"
+          structuredData={gallerySchema}
+        />
+        
+        <Navigation />
+        
+        <Section>
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+              <p className="text-muted-foreground">Loading gallery images...</p>
+            </div>
+          </div>
+        </Section>
+        
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,7 +77,7 @@ const Gallery = () => {
         description="Explore the photo gallery of Cozmo Cafe Bistro Lounge Hyderabad. See our beautiful interior, delicious food, refreshing beverages & cozy lounge ambiance. Best cafe photos in Banjara Hills."
         keywords="cafe gallery Hyderabad, restaurant photos Banjara Hills, lounge ambiance Hyderabad, cafe interior design, food photography Hyderabad, best cafe decor"
         canonicalUrl="https://cozmocafe.com/gallery"
-        structuredData={gallerySchema}
+        structuredData={dynamicGallerySchema}
       />
       
       <Navigation />
@@ -81,7 +101,7 @@ const Gallery = () => {
       <Section>
         {/* Filter */}
         <nav aria-label="Gallery categories" className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category) => (
+          {allCategories.map((category) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
@@ -99,20 +119,20 @@ const Gallery = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredImages.map((image, index) => (
+          {filteredImages.map((image) => (
             <figure 
-              key={index}
-              onClick={() => setSelectedImage(image.src)}
+              key={image._id}
+              onClick={() => setSelectedImage(image.url)}
               className="relative aspect-square overflow-hidden rounded-xl cursor-pointer group"
             >
               <img 
-                src={image.src} 
-                alt={image.alt}
+                src={image.url} 
+                alt={image.title || 'Gallery image'}
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <figcaption className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <span className="text-foreground font-medium text-center px-2">{image.alt}</span>
+                <span className="text-foreground font-medium text-center px-2">{image.title || image.category || 'Gallery image'}</span>
               </figcaption>
             </figure>
           ))}
@@ -146,5 +166,6 @@ const Gallery = () => {
     </div>
   );
 };
+
 
 export default Gallery;

@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Content from '../models/Content.js';
+import { Router } from 'express';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Get all content
 router.get('/', async (req, res) => {
@@ -59,7 +60,7 @@ router.put('/bulk', async (req, res) => {
     const updates = Object.entries(data).map(([key, value]) => ({
       updateOne: {
         filter: { section, key },
-        update: { $set: { value } },
+        update: { $set: { value: value as string } },
         upsert: true,
       },
     }));

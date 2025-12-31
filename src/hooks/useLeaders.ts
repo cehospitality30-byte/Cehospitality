@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leaderApi } from '@/lib/api';
+import { leaderApi, uploadImageToCloudinary } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function useLeaders() {
@@ -21,7 +21,16 @@ export function useCreateLeader() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: any) => leaderApi.create(data),
+    mutationFn: async (data: any) => {
+      // If there's a file to upload, upload it to Cloudinary first
+      if (data.imageFile) {
+        const uploadResult = await uploadImageToCloudinary(data.imageFile, 'leaders');
+        data.image = uploadResult.url;
+        data.publicId = uploadResult.publicId;
+        delete data.imageFile; // Remove the file object as it's not needed in the API call
+      }
+      return leaderApi.create(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leaders'] });
       toast.success('Leader added successfully');
@@ -36,7 +45,16 @@ export function useUpdateLeader() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => leaderApi.update(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      // If there's a file to upload, upload it to Cloudinary first
+      if (data.imageFile) {
+        const uploadResult = await uploadImageToCloudinary(data.imageFile, 'leaders');
+        data.image = uploadResult.url;
+        data.publicId = uploadResult.publicId;
+        delete data.imageFile; // Remove the file object as it's not needed in the API call
+      }
+      return leaderApi.update(id, data);
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['leaders'] });
       queryClient.invalidateQueries({ queryKey: ['leader', variables.id] });

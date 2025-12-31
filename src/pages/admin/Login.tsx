@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Lock, Mail } from 'lucide-react';
+import { authApi } from '@/lib/api';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -19,19 +20,23 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // In a real app, validate credentials with backend
-      if (formData.email && formData.password) {
-        // Store auth token (in real app, use secure storage)
-        localStorage.setItem('adminAuth', 'true');
-        toast.success('Login successful');
-        navigate('/admin');
-      } else {
-        toast.error('Please enter email and password');
-      }
+    try {
+      const response: any = await authApi.login({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      // Store the token in localStorage
+      localStorage.setItem('token', response.token);
+      
+      toast.success('Login successful');
+      navigate('/admin');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed. Please check your credentials.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

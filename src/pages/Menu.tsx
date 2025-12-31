@@ -8,6 +8,7 @@ import SEO from '@/components/SEO';
 import { generateMenuPdf } from '@/lib/generateMenuPdf';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useMenuItems } from '@/hooks/useMenu';
 
 // Import beverage category images
 import classicHotImg from '@/assets/menu/classic-hot.jpg';
@@ -42,9 +43,15 @@ import cookiesImg from '@/assets/menu/cookies.jpg';
 import cakesImg from '@/assets/menu/cakes.jpg';
 
 interface MenuItem {
+  _id?: string;
+  id?: string;
   name: string;
   price?: string;
   isSignature?: boolean;
+  category: string;
+  subcategory?: string;
+  description?: string;
+  type: 'beverage' | 'veg' | 'nonveg' | 'mixed';
 }
 
 interface MenuSubCategory {
@@ -65,576 +72,67 @@ interface MainCategory {
   subcategories: MenuSubCategory[];
 }
 
-// Original menu data organized into main categories
-const menuData: MainCategory[] = [
-  {
-    id: 'beverages',
-    name: 'Beverages',
-    icon: Coffee,
-    description: 'Crafted coffees, teas & refreshing drinks',
-    subcategories: [
-      {
-        id: 'classic-hot',
-        name: 'Classic Hot',
-        emoji: '☕',
-        image: classicHotImg,
-        type: 'beverage',
-        items: [
-          { name: 'Espresso' },
-          { name: 'Double Espresso' },
-          { name: 'Espresso Cubano' },
-          { name: 'Americano' },
-          { name: 'Cortado' },
-          { name: 'Cappuccino', isSignature: true },
-          { name: 'Latte' },
-          { name: 'Mocha' },
-        ]
-      },
-      {
-        id: 'cafe-special-hot',
-        name: 'Café Special Hot',
-        emoji: '☕',
-        image: cafeSpecialHotImg,
-        type: 'beverage',
-        items: [
-          { name: 'Hazelnut Latte', isSignature: true },
-          { name: 'Caramel Latte' },
-          { name: 'Popcorn Latte' },
-          { name: 'Irish Latte' },
-          { name: 'Lavender Mocha', isSignature: true },
-        ]
-      },
-      {
-        id: 'iced-coffee',
-        name: 'Iced Coffee',
-        emoji: '🧊',
-        image: icedCoffeeImg,
-        type: 'beverage',
-        items: [
-          { name: 'Iced Americano' },
-          { name: 'Iced Latte' },
-          { name: 'Vietnamese Shakerato', isSignature: true },
-          { name: 'French Vanilla Iced Latte' },
-        ]
-      },
-      {
-        id: 'cold-coffee',
-        name: 'Cold Coffee',
-        emoji: '❄️',
-        image: coldCoffeeImg,
-        type: 'beverage',
-        items: [
-          { name: 'Frappe' },
-          { name: 'Choco Frappe' },
-          { name: 'Hazelnut Cold Coffee' },
-          { name: 'Caramel Cold Coffee' },
-          { name: 'Nutella Cold Coffee', isSignature: true },
-          { name: 'Brownie Cold Coffee' },
-        ]
-      },
-      {
-        id: 'iced-teas',
-        name: 'Iced Teas',
-        emoji: '🍹',
-        image: icedTeasImg,
-        type: 'beverage',
-        items: [
-          { name: 'Lemon Iced Tea' },
-          { name: 'Passion Fruit Iced Tea', isSignature: true },
-          { name: 'Blueberry Iced Tea' },
-          { name: 'Peach Iced Tea' },
-        ]
-      },
-      {
-        id: 'espresso-infusion',
-        name: 'Espresso Cold Infusion',
-        emoji: '🍊',
-        image: espressoInfusionImg,
-        type: 'beverage',
-        items: [
-          { name: 'Espresso Cranberry' },
-          { name: 'Espresso Orange', isSignature: true },
-          { name: 'Espresso Fruit Mix' },
-          { name: 'Espresso Dust' },
-          { name: 'Espresso Refresher' },
-        ]
-      },
-      {
-        id: 'hot-teas',
-        name: 'Hot Teas',
-        emoji: '🍵',
-        image: hotTeasImg,
-        type: 'beverage',
-        items: [
-          { name: 'Green Tea' },
-          { name: 'White Ginger Tea' },
-          { name: 'Ayurvedic Khada Tea' },
-          { name: 'Hibiscus Honey Tea', isSignature: true },
-        ]
-      },
-      {
-        id: 'matcha',
-        name: 'Matcha',
-        emoji: '🍃',
-        image: matchaImg,
-        type: 'beverage',
-        items: [
-          { name: 'Iced Matcha' },
-          { name: 'Oat Milk Iced Matcha' },
-          { name: 'Matcha Latte', isSignature: true },
-          { name: 'Hazelnut Iced Matcha' },
-          { name: 'Strawberry Iced Matcha' },
-          { name: 'Coconut Matcha Cloud', isSignature: true },
-        ]
-      },
-      {
-        id: 'chocolate',
-        name: 'Signature Chocolate',
-        emoji: '🍫',
-        image: chocolateImg,
-        type: 'beverage',
-        items: [
-          { name: 'Hot Chocolate', isSignature: true },
-          { name: 'Spiced Hot Chocolate' },
-          { name: 'Iced Chocolate' },
-        ]
-      },
-      {
-        id: 'shakes',
-        name: 'Shakes',
-        emoji: '🥤',
-        image: shakesImg,
-        type: 'beverage',
-        items: [
-          { name: 'Vanilla Shake' },
-          { name: 'Chocolate Shake' },
-          { name: 'Blueberry Shake' },
-          { name: 'Ferrero Rocher Shake', isSignature: true },
-          { name: 'Mango Shake' },
-          { name: 'Strawberry Shake' },
-          { name: 'Mix Fruit Shake' },
-          { name: 'Pina Colada' },
-        ]
-      },
-      {
-        id: 'mojitos',
-        name: 'Mojitos & Refreshers',
-        emoji: '🌿',
-        image: mojitosImg,
-        type: 'beverage',
-        items: [
-          { name: 'Virgin Mojito' },
-          { name: 'Fresh Lime Soda (Sweet / Salt)' },
-          { name: 'Melon Refresher' },
-          { name: 'Orange Refresher' },
-          { name: 'Spiced Jamun Refresher', isSignature: true },
-          { name: 'Blue Lagoon' },
-          { name: 'Cosmopolitan' },
-          { name: 'Ginger Ale' },
-          { name: 'Aampanna Mojito' },
-          { name: 'Kiwi Mojito' },
-          { name: 'Blue Mojito', isSignature: true },
-          { name: 'Men at Work' },
-          { name: 'Blueberry Mojito' },
-          { name: 'Black Currant Mojito' },
-          { name: 'Big Billion' },
-          { name: 'Raspberry Mojito' },
-        ]
-      },
-      {
-        id: 'slashes',
-        name: 'Slashes',
-        emoji: '❄️',
-        image: slashesImg,
-        type: 'beverage',
-        items: [
-          { name: 'Kiwi Slashes' },
-          { name: 'Mango Slashes' },
-          { name: 'Strawberry Slashes' },
-          { name: 'Blueberry Slashes' },
-        ]
-      },
-    ]
-  },
-  {
-    id: 'starters',
-    name: 'Starters',
-    icon: Salad,
-    description: 'Soups, salads & appetizing bites',
-    subcategories: [
-      {
-        id: 'soups',
-        name: 'Soup',
-        emoji: '🍲',
-        image: soupsImg,
-        type: 'mixed',
-        items: [
-          { name: 'Tomato Basil', price: '₹199' },
-          { name: 'Spinach & Broccoli', price: '₹229' },
-          { name: 'Cream of Mushroom', price: '₹229', isSignature: true },
-          { name: 'Tom Kha', price: '₹219' },
-          { name: 'Chicken Chowder', price: '₹239' },
-          { name: 'Hot & Sour Chicken', price: '₹219' },
-          { name: 'Man Chow Chicken', price: '₹219' },
-          { name: 'Tom Yum Seafood', price: '₹239', isSignature: true },
-        ]
-      },
-      {
-        id: 'salads',
-        name: 'Salad',
-        emoji: '🥗',
-        image: saladsImg,
-        type: 'veg',
-        items: [
-          { name: 'Millet & Root Vegetable', price: '₹249' },
-          { name: 'Watermelon & Feta', price: '₹279', isSignature: true },
-          { name: 'Caesar Salad', price: '₹269' },
-        ],
-        note: 'Add-ons: Chicken – ₹99 | Seafood – ₹129 | Multi Seed – ₹79'
-      },
-      {
-        id: 'easy-bites',
-        name: 'Easy Bites',
-        emoji: '🍟',
-        image: easyBitesImg,
-        type: 'mixed',
-        items: [
-          { name: 'Fries (Salted / Peri Peri / Cheesy / Karam Podi)', price: '₹199 / ₹229 / ₹249 / ₹229' },
-          { name: 'Lotus Stem Chips', price: '₹229', isSignature: true },
-          { name: 'Fish Fingers', price: '₹299' },
-        ]
-      },
-      {
-        id: 'appetizers-veg',
-        name: 'Appetizers – Veg',
-        emoji: '🌱',
-        image: appetizersVegImg,
-        type: 'veg',
-        items: [
-          { name: 'Nachos Veg', price: '₹299' },
-          { name: 'Pesto Mushroom Toast', price: '₹249', isSignature: true },
-          { name: 'Pepper Toast', price: '₹219' },
-          { name: 'Cheese Jalapeno Poppers', price: '₹289' },
-          { name: 'Avocado Nigiri', price: '₹299', isSignature: true },
-          { name: 'Kung Pao Paneer', price: '₹279' },
-          { name: 'Mushroom Salt & Pepper', price: '₹279' },
-        ]
-      },
-      {
-        id: 'appetizers-nonveg',
-        name: 'Appetizers – Non Veg',
-        emoji: '🍗',
-        image: appetizersNonvegImg,
-        type: 'nonveg',
-        items: [
-          { name: 'Nachos Chicken', price: '₹329' },
-          { name: 'Crispy Parmesan Chicken', price: '₹329', isSignature: true },
-          { name: 'Salmon Nigiri', price: '₹329', isSignature: true },
-          { name: 'Kung Pao Chicken', price: '₹299' },
-          { name: 'Chicken Chilli', price: '₹279' },
-          { name: 'Crispy Pepper Chicken', price: '₹269' },
-          { name: 'Chicken Takrai', price: '₹319' },
-          { name: 'California Roll', price: '₹349', isSignature: true },
-        ]
-      },
-    ]
-  },
-  {
-    id: 'main-course',
-    name: 'Main Course',
-    icon: UtensilsCrossed,
-    description: 'Hearty sandos, burgers, pasta & more',
-    subcategories: [
-      {
-        id: 'sandwiches',
-        name: 'Sando',
-        emoji: '🥪',
-        image: sandwichesImg,
-        type: 'mixed',
-        items: [
-          { name: 'Bombay Style Sandwich', price: '₹249' },
-          { name: 'American Spinach Ricotta', price: '₹299' },
-          { name: 'Red Roaster Home Cheese Sando', price: '₹279', isSignature: true },
-          { name: 'Grilled Chicken & Avocado Sando', price: '₹299', isSignature: true },
-          { name: 'Cuban Sando', price: '₹279' },
-          { name: 'Red Roaster Chicken Sando', price: '₹299' },
-        ],
-        note: 'All sandwiches served with fries'
-      },
-      {
-        id: 'burgers',
-        name: 'Burgers',
-        emoji: '🍔',
-        image: burgersImg,
-        type: 'mixed',
-        items: [
-          { name: 'Veggies Overloaded', price: '₹249' },
-          { name: 'Paneer Chilli Burger', price: '₹249' },
-          { name: 'Chicken Crunch', price: '₹299', isSignature: true },
-          { name: 'Korean Chicken Burger', price: '₹299', isSignature: true },
-        ],
-        note: 'All burgers served with fries'
-      },
-      {
-        id: 'pizzas',
-        name: 'Pizza (9 inch)',
-        emoji: '🍕',
-        image: pizzasImg,
-        type: 'mixed',
-        items: [
-          { name: 'Classic Margherita', price: '₹369' },
-          { name: 'Farm House', price: '₹399' },
-          { name: 'Pesto Al Fungi', price: '₹399', isSignature: true },
-          { name: 'Pesto Polo', price: '₹429' },
-          { name: 'Polo Mexican', price: '₹429' },
-          { name: 'Chicken Pepperoni', price: '₹429', isSignature: true },
-        ]
-      },
-      {
-        id: 'healthy-bowls',
-        name: 'Healthy Bowls',
-        emoji: '🥗',
-        image: healthyBowlsImg,
-        type: 'veg',
-        items: [
-          { name: 'Quinoa Bowl', price: '₹299', isSignature: true },
-          { name: 'Millet Bowl', price: '₹299' },
-        ],
-        note: 'Add-ons: Chicken – ₹99 | Seafood – ₹109'
-      },
-      {
-        id: 'pasta',
-        name: 'Pasta',
-        emoji: '🍝',
-        image: pastaImg,
-        type: 'mixed',
-        items: [
-          { name: 'Alfredo (Veg / Non Veg)', price: '₹319 / ₹349' },
-          { name: 'Arrabbiata (Veg / Non Veg)', price: '₹309 / ₹339' },
-          { name: 'Pesto (Veg / Non Veg)', price: '₹329 / ₹359', isSignature: true },
-          { name: 'Aglio e Olio (Veg / Non Veg)', price: '₹299 / ₹329' },
-        ],
-        note: 'Available in Penne / Spaghetti'
-      },
-      {
-        id: 'rice-noodles',
-        name: 'Rice & Noodles',
-        emoji: '🍜',
-        image: riceNoodlesImg,
-        type: 'mixed',
-        items: [
-          { name: 'Pad Thai Noodles', price: '₹299', isSignature: true },
-          { name: 'Vegan Ramen', price: '₹299' },
-          { name: 'Hakka Noodles', price: '₹249' },
-          { name: 'Veg Fried Rice (Plain / Schezwan)', price: '₹229 / ₹249' },
-          { name: 'Egg Fried Rice (Plain / Schezwan)', price: '₹249 / ₹269' },
-          { name: 'Chicken Fried Rice (Plain / Schezwan)', price: '₹269 / ₹289' },
-        ]
-      },
-      {
-        id: 'breads',
-        name: 'Breads & Croissants',
-        emoji: '🍞',
-        image: breadsImg,
-        type: 'veg',
-        items: [
-          { name: 'Focaccia', price: '₹150' },
-          { name: 'Brioche Loaf (500g)', price: '₹240' },
-          { name: 'Sandwich Loaf (1500g)', price: '₹120' },
-          { name: 'Multigrain Loaf (1500g)', price: '₹150' },
-          { name: 'Butter Croissant', price: '₹85' },
-          { name: 'Chocolate Croissant', price: '₹129', isSignature: true },
-        ]
-      },
-    ]
-  },
-  {
-    id: 'desserts',
-    name: 'Desserts',
-    icon: Cake,
-    description: 'Sweet endings & baked delights',
-    subcategories: [
-      {
-        id: 'desserts',
-        name: 'Desserts',
-        emoji: '🍰',
-        image: dessertsImg,
-        type: 'veg',
-        items: [
-          { name: 'Classic Tiramisu', price: '₹249', isSignature: true },
-          { name: 'Opera Cake', price: '₹249' },
-          { name: 'Tres Leches', price: '₹199', isSignature: true },
-          { name: 'Classic New York Cheesecake', price: '₹199' },
-          { name: 'Russian Medovik', price: '₹119' },
-          { name: 'Red Velvet Cupcake', price: '₹99' },
-          { name: 'Triple Chocolate Brownie with Vanilla Ice Cream', price: '₹199', isSignature: true },
-          { name: 'Apricot Delight', price: '₹249' },
-          { name: 'Coconut Mousse', price: '₹249' },
-          { name: 'Panna Cotta (Seasonal Fruit / Chocolate)', price: '₹219 / ₹209' },
-        ]
-      },
-      {
-        id: 'cookies',
-        name: 'Cookies & Berliners',
-        emoji: '🍪',
-        image: cookiesImg,
-        type: 'veg',
-        items: [
-          { name: 'Choco Chip Cookie', price: '₹69' },
-          { name: 'Oatmeal Raisin Cookie', price: '₹59' },
-          { name: 'French Macaron (6 pcs)', price: '₹199', isSignature: true },
-          { name: 'Chocolate Berliner', price: '₹149' },
-          { name: 'Blueberry Berliner', price: '₹149' },
-          { name: 'Chocolate Doughnut', price: '₹119' },
-        ]
-      },
-      {
-        id: 'cakes',
-        name: 'Cakes',
-        emoji: '🎂',
-        image: cakesImg,
-        type: 'veg',
-        items: [
-          { name: 'Red Velvet (500g)', price: '₹750', isSignature: true },
-          { name: 'Black Forest', price: '₹650' },
-          { name: 'Belgium Chocolate', price: '₹700', isSignature: true },
-        ]
-      },
-    ]
-  },
-  {
-    id: 'chef-specials',
-    name: 'Chef Specials',
-    icon: ChefHat,
-    description: 'Signature creations by our culinary masters',
-    subcategories: [
-      {
-        id: 'chef-special',
-        name: 'Chef Special',
-        emoji: '👨‍🍳',
-        image: chefSpecialImg,
-        type: 'mixed',
-        items: [
-          { name: 'Stuffed Chicken with Orange Capers Sauce', price: '₹349', isSignature: true },
-          { name: 'Steam Pomfret with Creamy Garlic Sauce', price: '₹449', isSignature: true },
-          { name: 'Pesto Rice with Creamy Paprika Vegetable', price: '₹329', isSignature: true },
-          { name: 'Spicy Thai Basil Tofu with Jasmine Rice', price: '₹349', isSignature: true },
-          { name: 'Chicken Steak with Red Wine Sauce', price: '₹399', isSignature: true },
-          { name: 'Triple Schezwan Fried Rice', price: '₹249' },
-          { name: 'Stir Fried Tofu', price: '₹249' },
-          { name: 'Gochujang Korean Wings', price: '₹229', isSignature: true },
-        ]
-      },
-    ]
-  },
-];
 
-// Featured items for showcase section - curated selection
-const featuredItems = [
-  {
-    id: 'featured-cappuccino',
-    name: 'Cappuccino',
-    category: 'Classic Hot',
-    image: classicHotImg,
-    description: 'Rich espresso with velvety steamed milk foam',
-    tag: 'Bestseller',
-  },
-  {
-    id: 'featured-hazelnut-latte',
-    name: 'Hazelnut Latte',
-    category: 'Café Special',
-    image: cafeSpecialHotImg,
-    description: 'Aromatic hazelnut infused with creamy espresso',
-    tag: 'Signature',
-  },
-  {
-    id: 'featured-matcha-latte',
-    name: 'Matcha Latte',
-    category: 'Matcha',
-    image: matchaImg,
-    description: 'Premium Japanese matcha with smooth oat milk',
-    tag: 'Must Try',
-  },
-  {
-    id: 'featured-tiramisu',
-    name: 'Classic Tiramisu',
-    category: 'Desserts',
-    image: dessertsImg,
-    description: 'Authentic Italian layered coffee dessert',
-    price: '₹249',
-    tag: 'Chef\'s Pick',
-  },
-  {
-    id: 'featured-chicken-steak',
-    name: 'Chicken Steak',
-    category: 'Chef Special',
-    image: chefSpecialImg,
-    description: 'Tender chicken with red wine reduction sauce',
-    price: '₹399',
-    tag: 'Premium',
-  },
-  {
-    id: 'featured-pizza',
-    name: 'Chicken Pepperoni',
-    category: 'Pizza',
-    image: pizzasImg,
-    description: 'Wood-fired pizza with premium pepperoni',
-    price: '₹429',
-    tag: 'Popular',
-  },
-];
-
-// Flatten for PDF generation (keep original format)
-const flatMenuData = menuData.flatMap(main => 
-  main.subcategories.map(sub => ({
-    id: sub.id,
-    name: sub.name,
-    emoji: sub.emoji,
-    image: sub.image,
-    items: sub.items,
-    note: sub.note,
-    type: sub.type,
-  }))
-);
-
-// Menu Schema for SEO
-const menuSchema = {
-  "@context": "https://schema.org",
-  "@type": "Menu",
-  "name": "Cozmo Cafe Bistro Lounge Menu",
-  "description": "Complete café menu featuring coffee, teas, food, desserts and more at Cozmo Cafe Hyderabad",
-  "hasMenuSection": flatMenuData.map(category => ({
-    "@type": "MenuSection",
-    "name": category.name,
-    "hasMenuItem": category.items.map(item => ({
-      "@type": "MenuItem",
-      "name": item.name,
-      ...(item.price && {
-        "offers": {
-          "@type": "Offer",
-          "price": item.price.replace('₹', '').split(' ')[0],
-          "priceCurrency": "INR"
-        }
-      })
-    }))
-  }))
-};
 
 const Menu = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  
+  const { data: menuItems = [], isLoading } = useMenuItems() as { data: MenuItem[]; isLoading: boolean; };
+
+  // Group menu items by category and subcategory
+  const groupedMenuData = useMemo(() => {
+    const grouped: Record<string, Record<string, MenuItem[]>> = {};
+    
+    menuItems.forEach(item => {
+      const category = item.category || 'Other';
+      const subcategory = item.subcategory || 'General';
+      
+      if (!grouped[category]) {
+        grouped[category] = {};
+      }
+      
+      if (!grouped[category][subcategory]) {
+        grouped[category][subcategory] = [];
+      }
+      
+      grouped[category][subcategory].push(item);
+    });
+    
+    return grouped;
+  }, [menuItems]);
 
   // Get all subcategories for the full menu
   const allSubcategories = useMemo(() => {
-    return menuData.flatMap(main => 
-      main.subcategories.map(sub => ({
-        ...sub,
-        mainCategory: main.name,
-        mainCategoryId: main.id,
-        mainIcon: main.icon,
-      }))
-    );
-  }, []);
+    const subcategories: MenuSubCategory[] = [];
+    
+    // Define category icons and emojis
+    const categoryConfig: Record<string, { icon: React.ElementType; emoji: string; image: string; type: string }> = {
+      'Beverages': { icon: Coffee, emoji: '☕', image: classicHotImg, type: 'beverage' },
+      'Starters': { icon: Salad, emoji: '🥗', image: soupsImg, type: 'mixed' },
+      'Main Course': { icon: UtensilsCrossed, emoji: '🍽️', image: sandwichesImg, type: 'mixed' },
+      'Desserts': { icon: Cake, emoji: '🍰', image: dessertsImg, type: 'veg' },
+      'Chef Specials': { icon: ChefHat, emoji: '👨‍🍳', image: chefSpecialImg, type: 'mixed' },
+    };
+    
+    Object.entries(groupedMenuData).forEach(([category, subcategoriesMap]) => {
+      Object.entries(subcategoriesMap).forEach(([subcategory, items]) => {
+        const config = categoryConfig[category] || { icon: Coffee, emoji: '🍽️', image: classicHotImg, type: 'mixed' };
+        
+        subcategories.push({
+          id: `${category}-${subcategory}`.toLowerCase().replace(/\s+/g, '-'),
+          name: subcategory,
+          emoji: config.emoji,
+          image: config.image,
+          items,
+          note: undefined,
+          type: config.type as 'beverage' | 'veg' | 'nonveg' | 'mixed',
+        });
+      });
+    });
+    
+    return subcategories;
+  }, [groupedMenuData]);
 
   // Filter subcategories based on search
   const filteredSubcategories = useMemo(() => {
@@ -679,7 +177,29 @@ const Menu = () => {
         description="Explore our complete café menu at Cozmo Cafe Hyderabad. Classic coffee, specialty lattes, matcha, pizzas, pasta, burgers, desserts and more. Best café menu in KPHB."
         keywords="cafe menu Hyderabad, coffee menu KPHB, pizza, pasta, burgers, desserts, shakes, mojitos, iced tea, café food"
         canonicalUrl="https://cozmocafe.com/menu"
-        structuredData={menuSchema}
+        structuredData={menuItems.length > 0 ? {
+          "@context": "https://schema.org",
+          "@type": "Menu",
+          "name": "Cozmo Cafe Bistro Lounge Menu",
+          "description": "Complete café menu featuring coffee, teas, food, desserts and more at Cozmo Cafe Hyderabad",
+          "hasMenuSection": Object.entries(groupedMenuData).map(([category, subcategoriesMap]) => ({
+            "@type": "MenuSection",
+            "name": category,
+            "hasMenuItem": Object.values(subcategoriesMap).flatMap(items => 
+              items.map(item => ({
+                "@type": "MenuItem",
+                "name": item.name,
+                ...(item.price && {
+                  "offers": {
+                    "@type": "Offer",
+                    "price": item.price.replace('₹', '').split(' ')[0],
+                    "priceCurrency": "INR"
+                  }
+                })
+              }))
+            )
+          }))
+        } : {}}
       />
       
       <Navigation />
@@ -720,6 +240,15 @@ const Menu = () => {
               variant="outline" 
               size="sm"
               onClick={() => {
+                const flatMenuData = allSubcategories.map(sub => ({
+                  id: sub.id,
+                  name: sub.name,
+                  emoji: sub.emoji,
+                  image: sub.image,
+                  items: sub.items,
+                  note: sub.note,
+                  type: sub.type,
+                }));
                 generateMenuPdf(flatMenuData);
                 toast.success('Menu PDF downloaded!');
               }}
@@ -740,23 +269,27 @@ const Menu = () => {
             <div className="flex items-center justify-center gap-3 mb-6">
               <Sparkles className="w-5 h-5 text-primary" />
               <h2 className="font-display text-2xl md:text-3xl text-foreground">
-                Featured <span className="text-primary">Selections</span>
+                Our Top Signature <span className="text-primary">Selections</span>
               </h2>
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             
             {/* Featured Cards Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-              {featuredItems.map((item, idx) => (
+              {menuItems.filter(item => item.isSignature).slice(0, 6).map((item, idx) => (
                 <div
-                  key={item.id}
+                  key={item._id || item.id || idx}
                   className="group relative rounded-xl overflow-hidden bg-card/50 backdrop-blur-sm border border-border/30 hover:border-primary/50 transition-all duration-500 hover:shadow-lg hover:shadow-primary/10 opacity-0 animate-fade-up"
                   style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'forwards' }}
                 >
                   {/* Image */}
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
-                      src={item.image}
+                      src={item.category === 'Beverages' ? classicHotImg : 
+                           item.category === 'Starters' ? soupsImg : 
+                           item.category === 'Main Course' ? sandwichesImg : 
+                           item.category === 'Desserts' ? dessertsImg : 
+                           item.category === 'Chef Specials' ? chefSpecialImg : classicHotImg}
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
@@ -766,7 +299,7 @@ const Menu = () => {
                     <div className="absolute top-2 right-2">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[10px] font-semibold backdrop-blur-sm">
                         <Star className="w-2.5 h-2.5 fill-current" />
-                        {item.tag}
+                        {item.isSignature ? 'Signature' : 'Featured'}
                       </span>
                     </div>
                   </div>
@@ -774,13 +307,13 @@ const Menu = () => {
                   {/* Content */}
                   <div className="p-3">
                     <p className="text-[10px] text-primary/80 font-medium uppercase tracking-wider mb-0.5">
-                      {item.category}
+                      {item.category} {item.subcategory ? ` - ${item.subcategory}` : ''}
                     </p>
                     <h3 className="font-display text-sm text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
                       {item.name}
                     </h3>
                     <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                      {item.description}
+                      {item.description || 'Delicious menu item'}
                     </p>
                     {item.price && (
                       <p className="mt-2 text-sm font-semibold text-primary">{item.price}</p>
@@ -853,7 +386,7 @@ const Menu = () => {
             <div className="space-y-2 max-w-4xl mx-auto">
               {filteredSubcategories.map((sub, idx) => {
                 const isOpen = expandedCategories.has(sub.id);
-                const isChefSpecial = sub.mainCategoryId === 'chef-specials';
+                const isChefSpecial = sub.name.toLowerCase().includes('special') || sub.name.toLowerCase().includes('chef');
                 
                 return (
                   <div 
@@ -901,7 +434,7 @@ const Menu = () => {
                           )}
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                          {sub.mainCategory} • {sub.items.length} item{sub.items.length !== 1 ? 's' : ''}
+                          {sub.name} • {sub.items.length} item{sub.items.length !== 1 ? 's' : ''}
                         </p>
                       </div>
                       

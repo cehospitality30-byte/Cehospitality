@@ -6,63 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Clock, Percent, Gift, ArrowRight } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { useOffers } from '@/hooks/useOffers';
 
 import dessert from '@/assets/dessert.jpg';
 import signatureCoffee from '@/assets/signature-coffee.jpg';
 import chefSpecial from '@/assets/chef-special.jpg';
 
-const offers = [
-  {
-    title: 'Happy Hour Special',
-    description: 'Enjoy 20% off on all beverages from 4 PM to 7 PM, Monday to Thursday at our Hyderabad cafe.',
-    discount: '20% OFF',
-    image: signatureCoffee,
-    validity: 'Mon - Thu, 4 PM - 7 PM',
-    terms: 'Valid for dine-in only at Banjara Hills location. Cannot be combined with other offers.',
-  },
-  {
-    title: 'Weekend Brunch Hyderabad',
-    description: 'Unlimited brunch buffet with complimentary coffee. Perfect for weekend gatherings with friends and family.',
-    discount: 'Special Menu',
-    image: chefSpecial,
-    validity: 'Sat - Sun, 10 AM - 2 PM',
-    terms: 'Reservation required. Limited seating available at our Hyderabad outlet.',
-  },
-  {
-    title: 'Dessert Delight',
-    description: 'Order any main course and get a dessert of your choice absolutely free at Cozmo Cafe.',
-    discount: 'FREE Dessert',
-    image: dessert,
-    validity: 'All Week',
-    terms: 'Valid on main courses above ₹500. Subject to availability.',
-  },
-];
-
-// Offers Schema
-const offersSchema = {
-  "@context": "https://schema.org",
-  "@type": "OfferCatalog",
-  "name": "Cozmo Cafe Bistro Lounge Special Offers",
-  "description": "Special deals, discounts and offers at Cozmo Cafe Bistro Lounge Hyderabad",
-  "itemListElement": offers.map((offer, index) => ({
-    "@type": "Offer",
-    "position": index + 1,
-    "name": offer.title,
-    "description": offer.description,
-    "availability": "https://schema.org/InStock",
-    "seller": {
-      "@type": "LocalBusiness",
-      "name": "Cozmo Cafe Bistro Lounge",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Hyderabad",
-        "addressRegion": "Telangana"
-      }
-    }
-  }))
-};
-
 const Offers = () => {
+  const { data: offers = [], isLoading } = useOffers() as { data: any[]; isLoading: boolean; };
+
+  // Offers Schema
+  const offersSchema = {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "name": "Cozmo Cafe Bistro Lounge Special Offers",
+    "description": "Special deals, discounts and offers at Cozmo Cafe Bistro Lounge Hyderabad",
+    "itemListElement": offers.map((offer: any, index: number) => ({
+      "@type": "Offer",
+      "position": index + 1,
+      "name": offer.title,
+      "description": offer.description,
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "LocalBusiness",
+        "name": "Cozmo Cafe Bistro Lounge",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Hyderabad",
+          "addressRegion": "Telangana"
+        }
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SEO 
@@ -92,33 +68,43 @@ const Offers = () => {
 
       {/* Offers */}
       <Section>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {offers.map((offer, index) => (
-            <article key={index} className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-500 group">
-              <div className="relative h-48 overflow-hidden">
-                <img 
-                  src={offer.image} 
-                  alt={`${offer.title} - Special offer at Cozmo Cafe Hyderabad`}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold text-sm">
-                  {offer.discount}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading offers...</p>
+          </div>
+        ) : offers.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No offers available at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {offers.map((offer: any, index: number) => (
+              <article key={offer._id || offer.id || index} className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-500 group">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={offer.image || signatureCoffee} 
+                    alt={`${offer.title} - Special offer at Cozmo Cafe Hyderabad`}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                  <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold text-sm">
+                    {offer.discount || 'Special Offer'}
+                  </div>
                 </div>
-              </div>
-              <div className="p-6">
-                <h3 className="font-display text-xl text-foreground mb-2">{offer.title}</h3>
-                <p className="text-muted-foreground text-sm mb-4">{offer.description}</p>
-                <div className="flex items-center gap-2 text-sm text-primary mb-2">
-                  <Clock className="w-4 h-4" />
-                  <time>{offer.validity}</time>
+                <div className="p-6">
+                  <h3 className="font-display text-xl text-foreground mb-2">{offer.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{offer.description}</p>
+                  <div className="flex items-center gap-2 text-sm text-primary mb-2">
+                    <Clock className="w-4 h-4" />
+                    <time>{offer.startDate && offer.endDate ? `${new Date(offer.startDate).toLocaleDateString()} - ${new Date(offer.endDate).toLocaleDateString()}` : 'Valid Dates Vary'}</time>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{offer.terms || 'Subject to availability and terms.'}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{offer.terms}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
       </Section>
 
       {/* Loyalty Program */}

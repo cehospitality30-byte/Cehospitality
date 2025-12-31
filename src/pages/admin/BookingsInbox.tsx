@@ -40,7 +40,7 @@ export default function BookingsInbox() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: bookings = [], isLoading } = useBookings();
+  const { data: bookings = [], isLoading } = useBookings() as { data: Booking[]; isLoading: boolean; };
   const updateMutation = useUpdateBooking();
 
   const filteredBookings = bookings.filter(
@@ -59,8 +59,6 @@ export default function BookingsInbox() {
   const handleStatusChange = async (id: string, status: Booking['status']) => {
     await updateMutation.mutateAsync({ id, data: { status } });
   };
-
-  const pendingCount = bookings.filter((b: Booking) => b.status === 'pending').length;
 
   const getStatusBadge = (status: Booking['status']) => {
     const variants = {

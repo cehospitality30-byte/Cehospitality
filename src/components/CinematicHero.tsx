@@ -152,7 +152,7 @@ export function CinematicHero() {
       {/* Background Slider with Horizontal Right-to-Left Transition */}
       <div className="absolute inset-0">
         <div 
-          className="flex h-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+          className="flex h-full transition-transform duration-1200 ease-cinematic"
           style={{ 
             width: `${slides.length * 100}%`,
             transform: `translateX(-${currentSlide * (100 / slides.length)}%)` 
@@ -169,7 +169,7 @@ export function CinematicHero() {
                 <img 
                   src={slide.image} 
                   alt={slide.name.replace('\n', ' ')}
-                  className="w-full h-full object-cover transition-transform duration-[6000ms] ease-out"
+                  className="w-full h-full object-cover transition-transform duration-6000 ease-out"
                   style={{ 
                     transform: `translateY(${scrollY * 0.2}px) scale(${currentSlide === index ? 1.05 : 1})`,
                   }}

@@ -17,9 +17,9 @@ import {
   Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const adminMenuItems = [
+const baseMenuItems = [
   {
     title: 'Dashboard',
     icon: LayoutDashboard,
@@ -78,6 +78,8 @@ const adminMenuItems = [
 export function AdminSidebar() {
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState(baseMenuItems);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) {
@@ -85,6 +87,37 @@ export function AdminSidebar() {
     }
     return location.pathname.startsWith(href);
   };
+
+  useEffect(() => {
+    // Check if user is super admin to show super admin menu
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const isSuperAdmin = payload.role === 'superadmin';
+        setIsAdmin(isSuperAdmin);
+        
+        if (isSuperAdmin) {
+          // Add super admin menu item
+          setMenuItems([
+            ...baseMenuItems,
+            {
+              title: 'Super Admin',
+              icon: Users,
+              href: '/admin/superadmin',
+              exact: false,
+            }
+          ]);
+        } else {
+          setMenuItems(baseMenuItems);
+        }
+      } catch (error) {
+        console.error('Error parsing token:', error);
+        setIsAdmin(false);
+        setMenuItems(baseMenuItems);
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -132,7 +165,7 @@ export function AdminSidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-            {adminMenuItems.map((item) => {
+            {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href, item.exact);
 
@@ -174,7 +207,7 @@ export function AdminSidebar() {
               variant="ghost"
               className="w-full justify-start text-muted-foreground hover:text-destructive"
               onClick={() => {
-                localStorage.removeItem('adminAuth');
+                localStorage.removeItem('token');
                 window.location.href = '/admin/login';
               }}
             >

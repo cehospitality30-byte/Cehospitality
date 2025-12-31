@@ -1,45 +1,69 @@
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Mail, UtensilsCrossed, Tag, TrendingUp, Users } from 'lucide-react';
-
-const stats = [
-  {
-    title: 'Total Bookings',
-    value: '124',
-    change: '+12%',
-    icon: Calendar,
-    color: 'text-blue-500',
-  },
-  {
-    title: 'New Messages',
-    value: '23',
-    change: '+5',
-    icon: Mail,
-    color: 'text-green-500',
-  },
-  {
-    title: 'Menu Items',
-    value: '156',
-    change: '+8',
-    icon: UtensilsCrossed,
-    color: 'text-amber-500',
-  },
-  {
-    title: 'Active Offers',
-    value: '6',
-    change: '2 new',
-    icon: Tag,
-    color: 'text-purple-500',
-  },
-];
-
-const recentBookings = [
-  { id: 1, name: 'John Doe', date: '2024-01-15', time: '7:00 PM', guests: 4, status: 'confirmed' },
-  { id: 2, name: 'Jane Smith', date: '2024-01-15', time: '8:30 PM', guests: 2, status: 'pending' },
-  { id: 3, name: 'Mike Johnson', date: '2024-01-16', time: '6:00 PM', guests: 6, status: 'confirmed' },
-];
+import { useBookings } from '@/hooks/useBookings';
+import { useMenuItems } from '@/hooks/useMenu';
+import { useOffers } from '@/hooks/useOffers';
+import { useContacts } from '@/hooks/useContacts';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { data: bookings = [], isLoading: bookingsLoading } = useBookings() as { data: any[]; isLoading: boolean };
+  const { data: menuItems = [], isLoading: menuItemsLoading } = useMenuItems() as { data: any[]; isLoading: boolean };
+  const { data: offers = [], isLoading: offersLoading } = useOffers() as { data: any[]; isLoading: boolean };
+  const { data: contacts = [], isLoading: contactsLoading } = useContacts() as { data: any[]; isLoading: boolean };
+
+  // Calculate stats
+  const totalBookings = bookings.length;
+  const pendingBookings = bookings.filter((b: any) => b.status === 'pending').length;
+  const totalMenuItems = menuItems.length;
+  const activeOffers = offers.filter((o: any) => o.isActive).length;
+  const unreadMessages = contacts.filter((c: any) => c.status === 'unread').length;
+
+  const stats = [
+    {
+      title: 'Total Bookings',
+      value: totalBookings.toString(),
+      change: '+12%',
+      icon: Calendar,
+      color: 'text-blue-500',
+    },
+    {
+      title: 'New Messages',
+      value: unreadMessages.toString(),
+      change: '+5',
+      icon: Mail,
+      color: 'text-green-500',
+    },
+    {
+      title: 'Menu Items',
+      value: totalMenuItems.toString(),
+      change: '+8',
+      icon: UtensilsCrossed,
+      color: 'text-amber-500',
+    },
+    {
+      title: 'Active Offers',
+      value: activeOffers.toString(),
+      change: '2 new',
+      icon: Tag,
+      color: 'text-purple-500',
+    },
+  ];
+
+  // Get recent bookings
+  const recentBookings = bookings
+    .slice(0, 3)
+    .map((booking: any) => ({
+      id: booking._id || booking.id,
+      name: booking.name,
+      date: new Date(booking.date).toISOString().split('T')[0],
+      time: booking.time,
+      guests: booking.guests,
+      status: booking.status,
+    }));
+
   return (
     <AdminLayout title="Dashboard" description="Overview of your cafe management">
       <div className="space-y-6">
@@ -110,22 +134,34 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <button className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left">
+                <button 
+                  onClick={() => navigate('/admin/menu')}
+                  className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left cursor-pointer"
+                >
                   <UtensilsCrossed className="w-6 h-6 text-primary mb-2" />
                   <p className="font-medium">Add Menu Item</p>
                   <p className="text-xs text-muted-foreground">Create new dish</p>
                 </button>
-                <button className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left">
+                <button 
+                  onClick={() => navigate('/admin/offers')}
+                  className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left cursor-pointer"
+                >
                   <Tag className="w-6 h-6 text-primary mb-2" />
                   <p className="font-medium">Create Offer</p>
                   <p className="text-xs text-muted-foreground">New promotion</p>
                 </button>
-                <button className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left">
+                <button 
+                  onClick={() => navigate('/admin/contacts')}
+                  className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left cursor-pointer"
+                >
                   <Mail className="w-6 h-6 text-primary mb-2" />
                   <p className="font-medium">View Messages</p>
                   <p className="text-xs text-muted-foreground">23 unread</p>
                 </button>
-                <button className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left">
+                <button 
+                  onClick={() => navigate('/admin/bookings')}
+                  className="p-4 border border-border rounded-lg hover:bg-muted transition-colors text-left cursor-pointer"
+                >
                   <Calendar className="w-6 h-6 text-primary mb-2" />
                   <p className="font-medium">Manage Bookings</p>
                   <p className="text-xs text-muted-foreground">124 total</p>

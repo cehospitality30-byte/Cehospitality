@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
+import { config } from './env.js';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    // Use MongoDB Atlas connection string from environment or default
-    const mongoURI = process.env.MONGODB_URI || 
-      'mongodb+srv://cehospitality30_db_user:JLq7jmYHDW8d0XTc@cehospitality.nyod0or.mongodb.net/cehospitality?retryWrites=true&w=majority&appName=cehospitality';
-    
+    const mongoURI = config.mongoUri;
+
     const options = {
       serverApi: {
         version: '1' as const,
@@ -13,25 +12,30 @@ export const connectDB = async (): Promise<void> => {
         deprecationErrors: true,
       },
     };
-    
+
+    console.log('🔌 Connecting to MongoDB...');
     await mongoose.connect(mongoURI, options);
-    
+
     console.log('✅ MongoDB Connected Successfully');
     console.log(`📊 Database: ${mongoose.connection.name}`);
     console.log(`🌐 Host: ${mongoose.connection.host}`);
-    
+
     // Send a ping to confirm successful connection
-    await mongoose.connection.db.admin().command({ ping: 1 });
-    console.log('✅ Pinged deployment. Successfully connected to MongoDB Atlas!');
-    
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.admin().command({ ping: 1 });
+      console.log('✅ Pinged deployment. Successfully connected to MongoDB Atlas!');
+    } else {
+      console.log('⚠️ Could not ping database, but connection established');
+    }
+
     mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB connection error:', err);
     });
-    
+
     mongoose.connection.on('disconnected', () => {
       console.log('⚠️ MongoDB disconnected');
     });
-    
+
     // Handle process termination
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
@@ -40,7 +44,15 @@ export const connectDB = async (): Promise<void> => {
     });
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error);
-    process.exit(1);
+
+    // In development, we might want to continue running even if DB fails
+    if (config.nodeEnv === 'development') {
+      console.log('⚠️ Running in development mode without database connection');
+      console.log('💡 Continuing server startup for development...');
+    } else {
+      process.exit(1);
+    }
   }
 };
+
 

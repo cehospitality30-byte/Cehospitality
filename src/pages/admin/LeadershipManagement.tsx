@@ -20,46 +20,23 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLeaders, useCreateLeader, useUpdateLeader, useDeleteLeader } from '@/hooks/useLeaders';
 
 interface Leader {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   role: string;
   description: string;
   image?: string;
+  publicId?: string;
+  imageFile?: File;
 }
 
-const mockLeaders: Leader[] = [
-  {
-    id: '1',
-    name: 'Samuel Charles',
-    role: 'Founder & CEO',
-    description: 'With over 15 years in luxury hospitality, Samuel leads the group\'s strategic vision...',
-  },
-  {
-    id: '2',
-    name: 'Padma Vijaya',
-    role: 'Director of Operations',
-    description: 'Padma ensures seamless operations across all venues...',
-  },
-  {
-    id: '3',
-    name: 'Sidhaartha',
-    role: 'Culinary Director',
-    description: 'An award-winning chef bringing innovative cuisine...',
-  },
-  {
-    id: '4',
-    name: 'Vidya Sagar',
-    role: 'Brand Director',
-    description: 'Vidya shapes the visual identity and guest experience...',
-  },
-];
-
 export default function LeadershipManagement() {
-  const [leaders, setLeaders] = useState<Leader[]>(mockLeaders);
+  const { data: leaders = [], isLoading, refetch } = useLeaders() as { data: Leader[], isLoading: boolean, refetch: () => void };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLeader, setEditingLeader] = useState<Leader | null>(null);
   const [formData, setFormData] = useState<Partial<Leader>>({
@@ -67,6 +44,10 @@ export default function LeadershipManagement() {
     role: '',
     description: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const createMutation = useCreateLeader();
+  const updateMutation = useUpdateLeader();
+  const deleteMutation = useDeleteLeader();
 
   const handleAdd = () => {
     setEditingLeader(null);
@@ -75,38 +56,58 @@ export default function LeadershipManagement() {
       role: '',
       description: '',
     });
+    setImageFile(null);
     setIsDialogOpen(true);
   };
 
   const handleEdit = (leader: Leader) => {
     setEditingLeader(leader);
     setFormData(leader);
+    setImageFile(null);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    setLeaders(leaders.filter((leader) => leader.id !== id));
-    toast.success('Leader deleted');
+    if (confirm('Are you sure you want to delete this leader?')) {
+      deleteMutation.mutate(id);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingLeader) {
-      setLeaders(
-        leaders.map((leader) =>
-          leader.id === editingLeader.id ? { ...formData, id: editingLeader.id } as Leader : leader
-        )
-      );
-      toast.success('Leader updated');
-    } else {
-      const newLeader: Leader = {
-        ...formData,
-        id: Date.now().toString(),
-      } as Leader;
-      setLeaders([...leaders, newLeader]);
-      toast.success('Leader added');
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
     }
-    setIsDialogOpen(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Prepare form data
+      const submitData = { ...formData };
+      
+      // Add image file to the data if it exists
+      if (imageFile) {
+        submitData.imageFile = imageFile;
+      }
+      
+      if (editingLeader) {
+        const id = editingLeader._id || editingLeader.id;
+        if (id) {
+          await updateMutation.mutateAsync({ id, data: submitData });
+        }
+      } else {
+        await createMutation.mutateAsync(submitData);
+      }
+      
+      setIsDialogOpen(false);
+      setFormData({ name: '', role: '', description: '' });
+      setImageFile(null);
+      
+      toast.success(editingLeader ? 'Leader updated successfully' : 'Leader added successfully');
+    } catch (error) {
+      toast.error('Failed to save leader');
+    }
   };
 
   return (
@@ -114,7 +115,7 @@ export default function LeadershipManagement() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">{leaders.length} team members</p>
+          <p className="text-muted-foreground">{leaders.length} team member{leaders.length !== 1 ? 's' : ''}</p>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleAdd}>
@@ -158,11 +159,33 @@ export default function LeadershipManagement() {
                     required
                   />
                 </div>
+                <div>
+                  <Label htmlFor="image">Image</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                  {imageFile && (
+                    <p className="text-xs text-muted-foreground mt-1">{imageFile.name}</p>
+                  )}
+                </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">Save Leader</Button>
+                  <Button 
+                    type="submit" 
+                    disabled={(editingLeader ? updateMutation.isPending : createMutation.isPending)}
+                  >
+                    {(editingLeader ? updateMutation.isPending : createMutation.isPending) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (editingLeader ? 'Update' : 'Create')}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -181,27 +204,51 @@ export default function LeadershipManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaders.map((leader) => (
-                <TableRow key={leader.id}>
-                  <TableCell className="font-medium">{leader.name}</TableCell>
-                  <TableCell>{leader.role}</TableCell>
-                  <TableCell className="max-w-md">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {leader.description}
-                    </p>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(leader)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(leader.id)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : leaders.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    No leaders found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                leaders.map((leader) => (
+                  <TableRow key={leader._id || leader.id}>
+                    <TableCell className="font-medium">{leader.name}</TableCell>
+                    <TableCell>{leader.role}</TableCell>
+                    <TableCell className="max-w-md">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {leader.description}
+                      </p>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleEdit(leader)}
+                          disabled={updateMutation.isPending}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDelete(leader._id || leader.id || '')}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
