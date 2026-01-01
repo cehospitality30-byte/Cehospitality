@@ -1,13 +1,11 @@
 import express from 'express';
-console.log('DEBUG: Imported express');
 import cors from 'cors';
-console.log('DEBUG: Imported cors');
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
-console.log('DEBUG: Imported env');
 import { connectDB } from './config/database.js';
-console.log('DEBUG: Imported connectDB');
 
 // Routes
 import menuRoutes from './routes/menu.routes.js';
@@ -96,6 +94,22 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Serve static files from the React app build directory (only in production)
+if (config.nodeEnv === 'production') {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const frontendBuildPath = path.join(__dirname, '../../dist');
+
+  app.use(express.static(frontendBuildPath));
+
+  // Handle React Router routes - serve index.html for non-API routes
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    }
+  });
+}
+
 // For Vercel serverless functions, export the app
 // In development mode, start the server normally
 if (process.env.NODE_ENV !== 'production') {
@@ -113,8 +127,9 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
   startServer();
+} else {
+  // In production, export the app for serverless functions
+  console.log('Production server configured');
 }
 
 export default app;
-
-

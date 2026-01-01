@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "Node16",
     "lib": ["ES2022"],
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "../dist/server",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

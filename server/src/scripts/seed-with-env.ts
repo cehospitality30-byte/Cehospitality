@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import MenuItem from '../models/MenuItem.js';
@@ -11,13 +10,8 @@ import GalleryImage from '../models/GalleryImage.js';
 import Leader from '../models/Leader.js';
 import Content from '../models/Content.js';
 
-// Load .env file from server directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-dotenv.config({ path: join(__dirname, '../../.env') });
-
-// Get connection string from environment
-const mongoURI = process.env.MONGODB_URI;
+// Use hardcoded connection string
+const mongoURI = 'mongodb+srv://babu789387_db_user:676F1gc3Ivb9hwXq@cluster0.64ute6w.mongodb.net/CAHospility?retryWrites=true&w=majority&tls=true&tlsInsecure=false&appName=Cluster0';
 
 if (!mongoURI) {
   console.error('❌ MONGODB_URI not found in .env file!');

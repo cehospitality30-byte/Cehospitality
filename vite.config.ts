@@ -8,6 +8,23 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy API requests to the backend server
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/health': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+  build: {
+    outDir: path.resolve(__dirname, "server/dist"), // Build to server/dist so the Express server can serve it
+    emptyOutDir: true, // Remove previous build files
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

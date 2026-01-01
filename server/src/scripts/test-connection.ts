@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const mongoURI = process.env.MONGODB_URI || 
-  'mongodb+srv://cehospitality30_db_user:JLq7jmYHDW8d0XTc@cehospitality.nyod0or.mongodb.net/cehospitality?retryWrites=true&w=majority&appName=cehospitality';
+const mongoURI = 'mongodb+srv://babu789387_db_user:676F1gc3Ivb9hwXq@cluster0.64ute6w.mongodb.net/CAHospility?retryWrites=true&w=majority&tls=true&tlsInsecure=false&appName=Cluster0';
 
 const connectionOptions = {
   serverApi: {

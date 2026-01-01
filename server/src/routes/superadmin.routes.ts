@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
-import Admin from '../models/Admin';
-import { config } from '../config/env';
+import Admin from '../models/Admin.js';
+import { config } from '../config/env.js';
 
 interface JwtPayload {
   id: string;
