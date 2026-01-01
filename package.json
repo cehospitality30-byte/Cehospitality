@@ -20,7 +20,8 @@
     "start:both": "npm-run-all --parallel dev:server dev:frontend",
     "build:all": "npm run build && npm run build:server",
     "start": "node server/dist/index.js",
-    "dev:unified": "concurrently \"npm run dev:server\" \"npm run dev:frontend\""
+    "dev:unified": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
+    "vercel-build": "npm run build && npm run build:server"
   },
   "dependencies": {
     "@cloudinary/react": "^1.14.3",

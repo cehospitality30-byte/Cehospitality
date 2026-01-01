@@ -260,7 +260,7 @@ For production deployment:
 - **JWT Authentication**: Secure token-based authentication
 - **Password Hashing**: bcrypt for secure password storage
 - **Rate Limiting**: Protection against API abuse
-- **Helmet**: Security headers for Express.js
+- **Helmet**: Security headers with Content Security Policy for Express.js
 - **CORS**: Configured for secure cross-origin requests
 - **Input Validation**: Proper validation for all inputs
 

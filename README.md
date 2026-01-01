@@ -45,7 +45,7 @@ This application is configured to run both the backend server and frontend on th
 npm install
 ```
 
-3. Set up environment variables (see `.env.example`)
+3. Set up environment variables (see `server/.env.example` for backend and `.env.example` for frontend)
 
 ## Development
 

@@ -36,7 +36,34 @@ if (config.nodeEnv === 'production') {
 
 // Security middleware
 if (config.nodeEnv === 'production') {
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", config.corsOrigin, 'https://www.google.com', 'https://www.gstatic.com'],
+        frameSrc: ["'self'", "https://www.google.com"],
+        objectSrc: ["'none'"],
+      },
+    },
+  }));
+} else {
+  // In development, use a more permissive CSP
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", "http://localhost:8080", "http://localhost:5000"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000"],
+        styleSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000"],
+        imgSrc: ["'self'", "data:", "https:", "http://localhost:8080", "http://localhost:5000"],
+        connectSrc: ["'self'", "http://localhost:8080", "http://localhost:5000", "https://www.google.com", "https://www.gstatic.com"],
+        frameSrc: ["'self'", "https://www.google.com", "http://localhost:8080"],
+        objectSrc: ["'none'"],
+      },
+    },
+  }));
 
   // Rate limiting
   const limiter = rateLimit({
@@ -112,13 +139,19 @@ if (config.nodeEnv === 'production') {
 
 // For Vercel serverless functions, export the app
 // In development mode, start the server normally
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_REGION === undefined) {
+  // Start the server in development or when not running on Vercel
   const startServer = async () => {
     try {
-      await connectDB();
+      if (process.env.NODE_ENV !== 'production') {
+        await connectDB();
+      }
       app.listen(PORT, () => {
         console.log(`🚀 Server running on http://localhost:${PORT}`);
         console.log(`📡 API endpoints available at http://localhost:${PORT}/api`);
+        if (config.nodeEnv === 'production') {
+          console.log(`🌐 Frontend available at http://localhost:${PORT}`);
+        }
       });
     } catch (error) {
       console.error('Failed to start server:', error);
@@ -128,8 +161,8 @@ if (process.env.NODE_ENV !== 'production') {
 
   startServer();
 } else {
-  // In production, export the app for serverless functions
-  console.log('Production server configured');
+  // In Vercel production, export the app for serverless functions
+  console.log('Production server configured for Vercel');
 }
 
 export default app;
