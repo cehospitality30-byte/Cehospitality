@@ -5,7 +5,7 @@
     "lib": ["ES2022"],
     "moduleResolution": "node16",
     "rootDir": "./src",
-    "outDir": "../dist/server",
+    "outDir": "./dist",  /* Changed from "../dist/server" to "./dist" for simpler production deployment */
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -19,4 +19,3 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
