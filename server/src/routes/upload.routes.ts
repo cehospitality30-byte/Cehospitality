@@ -1,7 +1,7 @@
 import express from 'express';
 import cloudinary from '../config/cloudinary.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 // Upload image to Cloudinary
 router.post('/', async (req: express.Request, res: express.Response) => {

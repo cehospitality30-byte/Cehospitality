@@ -2,7 +2,7 @@ import express from 'express';
 
 import { config } from '../config/env.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 // Health check endpoint
 router.get('/', (req: express.Request, res: express.Response) => {

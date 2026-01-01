@@ -3,7 +3,7 @@ import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 // Admin login
 router.post('/login', async (req: express.Request, res: express.Response) => {

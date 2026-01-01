@@ -4,7 +4,7 @@ import MenuItem from '../models/MenuItem.js';
 import cloudinary from '../config/cloudinary.js';
 import { config } from '../config/env.js';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 // Get all menu items
 router.get('/', async (req: express.Request, res: express.Response) => {
