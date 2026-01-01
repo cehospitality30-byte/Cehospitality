@@ -1,19 +1,19 @@
 import express from 'express';
-import { Request, Response, Router } from 'express';
+
 import Contact from '../models/Contact.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all contacts
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: express.Request, res: express.Response) => {
   try {
     const { status } = req.query;
     const query: any = {};
-    
+
     if (status) {
       query.status = status;
     }
-    
+
     const contacts = await Contact.find(query).sort({ createdAt: -1 });
     res.json(contacts);
   } catch (error: any) {
@@ -22,7 +22,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get single contact
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
@@ -35,7 +35,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create contact
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: express.Request, res: express.Response) => {
   try {
     const contact = new Contact(req.body);
     await contact.save();
@@ -46,7 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update contact
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const contact = await Contact.findByIdAndUpdate(
       req.params.id,
@@ -63,7 +63,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete contact
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const contact = await Contact.findByIdAndDelete(req.params.id);
     if (!contact) {

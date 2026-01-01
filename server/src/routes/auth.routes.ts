@@ -1,13 +1,12 @@
 import express from 'express';
-import { Request, Response, Router } from 'express';
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Admin login
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', async (req: express.Request, res: express.Response) => {
   try {
     const { email, password } = req.body;
 
@@ -52,7 +51,7 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // Verify token
-router.get('/verify', async (req: Request, res: Response) => {
+router.get('/verify', async (req: express.Request, res: express.Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -61,7 +60,7 @@ router.get('/verify', async (req: Request, res: Response) => {
 
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret) as { id: string; email: string; role: string };
-    
+
     // Check if admin still exists
     const admin = await Admin.findById(decoded.id);
     if (!admin) {

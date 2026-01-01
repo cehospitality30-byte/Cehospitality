@@ -1,12 +1,12 @@
 import express from 'express';
-import { Request, Response, Router } from 'express';
+
 import Leader from '../models/Leader.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all leaders
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: express.Request, res: express.Response) => {
   try {
     const leaders = await Leader.find().sort({ createdAt: -1 });
     res.json(leaders);
@@ -16,7 +16,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get single leader
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const leader = await Leader.findById(req.params.id);
     if (!leader) {
@@ -29,7 +29,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create leader
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: express.Request, res: express.Response) => {
   try {
     // If there's an image in the request, upload it to Cloudinary
     if (req.body.image && req.body.image.startsWith('data:')) {
@@ -39,12 +39,12 @@ router.post('/', async (req: Request, res: Response) => {
         use_filename: false,
         unique_filename: true,
       });
-      
+
       // Replace the image data with the Cloudinary URL
       req.body.image = result.secure_url;
       req.body.publicId = result.public_id;
     }
-    
+
     const leader = new Leader(req.body);
     await leader.save();
     res.status(201).json(leader);
@@ -54,7 +54,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update leader
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: express.Request, res: express.Response) => {
   try {
     // Handle image update if there's a new image
     if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
@@ -63,19 +63,19 @@ router.put('/:id', async (req: Request, res: Response) => {
       if (existingLeader && existingLeader.publicId) {
         await cloudinary.uploader.destroy(existingLeader.publicId);
       }
-      
+
       // Upload the new image to Cloudinary
       const result = await cloudinary.uploader.upload(req.body.image, {
         folder: 'cehospitality/leaders',
         use_filename: false,
         unique_filename: true,
       });
-      
+
       // Update the image URL and publicId in the request body
       req.body.image = result.secure_url;
       req.body.publicId = result.public_id;
     }
-    
+
     const leader = await Leader.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -91,18 +91,18 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete leader
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const leader = await Leader.findById(req.params.id);
     if (!leader) {
       return res.status(404).json({ error: 'Leader not found' });
     }
-    
+
     // If the leader has a publicId, delete it from Cloudinary
     if (leader.publicId) {
       await cloudinary.uploader.destroy(leader.publicId);
     }
-    
+
     await Leader.findByIdAndDelete(req.params.id);
     res.json({ message: 'Leader deleted successfully' });
   } catch (error: any) {

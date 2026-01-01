@@ -1,23 +1,23 @@
 import express from 'express';
-import { Request, Response, Router } from 'express';
+
 import Booking from '../models/Booking.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all bookings
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: express.Request, res: express.Response) => {
   try {
     const { status, date } = req.query;
     const query: any = {};
-    
+
     if (status) {
       query.status = status;
     }
-    
+
     if (date) {
       query.date = new Date(date as string);
     }
-    
+
     const bookings = await Booking.find(query).sort({ createdAt: -1 });
     res.json(bookings);
   } catch (error: any) {
@@ -26,7 +26,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get single booking
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const booking = await Booking.findById(req.params.id);
     if (!booking) {
@@ -39,7 +39,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create booking
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: express.Request, res: express.Response) => {
   try {
     const booking = new Booking(req.body);
     await booking.save();
@@ -50,7 +50,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update booking
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
@@ -67,7 +67,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete booking
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) {

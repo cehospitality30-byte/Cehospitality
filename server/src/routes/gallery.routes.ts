@@ -1,19 +1,19 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
 import GalleryImage from '../models/GalleryImage.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all gallery images
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: express.Request, res: express.Response) => {
   try {
     const { category } = req.query;
     const query: any = {};
-    
+
     if (category) {
       query.category = category as string;
     }
-    
+
     const images = await GalleryImage.find(query).sort({ createdAt: -1 });
     res.json(images);
   } catch (error: any) {
@@ -22,7 +22,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get single image
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const image = await GalleryImage.findById(req.params.id);
     if (!image) {
@@ -35,7 +35,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create image
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: express.Request, res: express.Response) => {
   try {
     // If there's a file in the request, upload it to Cloudinary
     if (req.body.image && req.body.image.startsWith('data:')) {
@@ -45,12 +45,12 @@ router.post('/', async (req: Request, res: Response) => {
         use_filename: false,
         unique_filename: true,
       });
-      
+
       // Replace the image data with the Cloudinary URL
       req.body.image = result.secure_url;
       req.body.publicId = result.public_id;
     }
-    
+
     const image = new GalleryImage(req.body);
     await image.save();
     res.status(201).json(image);
@@ -60,7 +60,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update image
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: express.Request, res: express.Response) => {
   try {
     // Handle image update if there's a new image
     if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
@@ -69,19 +69,19 @@ router.put('/:id', async (req: Request, res: Response) => {
       if (existingImage && existingImage.publicId) {
         await cloudinary.uploader.destroy(existingImage.publicId);
       }
-      
+
       // Upload the new image to Cloudinary
       const result = await cloudinary.uploader.upload(req.body.image, {
         folder: 'cehospitality/gallery',
         use_filename: false,
         unique_filename: true,
       });
-      
+
       // Update the image URL and publicId in the request body
       req.body.image = result.secure_url;
       req.body.publicId = result.public_id;
     }
-    
+
     const image = await GalleryImage.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -97,18 +97,18 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete image
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: express.Request, res: express.Response) => {
   try {
     const image = await GalleryImage.findById(req.params.id);
     if (!image) {
       return res.status(404).json({ error: 'Image not found' });
     }
-    
+
     // If the image has a publicId, delete it from Cloudinary
     if (image.publicId) {
       await cloudinary.uploader.destroy(image.publicId);
     }
-    
+
     await GalleryImage.findByIdAndDelete(req.params.id);
     res.json({ message: 'Image deleted successfully' });
   } catch (error: any) {

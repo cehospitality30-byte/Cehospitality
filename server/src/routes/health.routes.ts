@@ -1,11 +1,11 @@
 import express from 'express';
-import { Request, Response, Router } from 'express';
+
 import { config } from '../config/env.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Health check endpoint
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (req: express.Request, res: express.Response) => {
   const healthCheck = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -22,7 +22,7 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // Detailed health check
-router.get('/detailed', (req: Request, res: Response) => {
+router.get('/detailed', (req: express.Request, res: express.Response) => {
   const detailedHealthCheck = {
     status: 'healthy',
     timestamp: new Date().toISOString(),

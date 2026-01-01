@@ -1,4 +1,4 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import { config } from '../config/env.js';
@@ -9,10 +9,10 @@ interface JwtPayload {
   role: string;
 }
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Create super admin (only first super admin can be created without authentication)
-router.post('/superadmin', async (req: Request, res: Response) => {
+router.post('/superadmin', async (req: express.Request, res: express.Response) => {
   try {
     const { email, password, name } = req.body;
 
@@ -62,7 +62,7 @@ router.post('/superadmin', async (req: Request, res: Response) => {
 });
 
 // Create admin (only super admin can do this)
-router.post('/admin', async (req: Request, res: Response) => {
+router.post('/admin', async (req: express.Request, res: express.Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -71,7 +71,7 @@ router.post('/admin', async (req: Request, res: Response) => {
 
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
-    
+
     // Check if user is super admin
     if (decoded.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied. Super admin privileges required.' });
@@ -114,7 +114,7 @@ router.post('/admin', async (req: Request, res: Response) => {
 });
 
 // Get all admins (only super admin can do this)
-router.get('/admins', async (req: Request, res: Response) => {
+router.get('/admins', async (req: express.Request, res: express.Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -123,7 +123,7 @@ router.get('/admins', async (req: Request, res: Response) => {
 
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
-    
+
     // Check if user is super admin
     if (decoded.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied. Super admin privileges required.' });
@@ -141,7 +141,7 @@ router.get('/admins', async (req: Request, res: Response) => {
 });
 
 // Delete admin (only super admin can do this)
-router.delete('/admin/:id', async (req: Request, res: Response) => {
+router.delete('/admin/:id', async (req: express.Request, res: express.Response) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -150,7 +150,7 @@ router.delete('/admin/:id', async (req: Request, res: Response) => {
 
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
-    
+
     // Check if user is super admin
     if (decoded.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied. Super admin privileges required.' });
