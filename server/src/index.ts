@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -24,7 +24,7 @@ import superadminRoutes from './routes/superadmin.routes.js';
 import authRoutes from './routes/auth.routes.js';
 console.log('DEBUG: Imported all routes');
 
-const app = express();
+const app: Application = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : config.port;
 
 console.log('DEBUG: Current NODE_ENV:', config.nodeEnv);
@@ -83,12 +83,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
 // Database connection middleware for serverless (production)
-app.use(async (req, res, next) => {
+app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (config.nodeEnv === 'production') {
     try {
       await connectDB();
@@ -116,7 +116,7 @@ app.use('/api/auth', authRoutes);
 
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
@@ -130,7 +130,7 @@ if (config.nodeEnv === 'production') {
   app.use(express.static(frontendBuildPath));
 
   // Handle React Router routes - serve index.html for non-API routes
-  app.get('*', (req, res) => {
+  app.get('*', (req: Request, res: Response) => {
     if (!req.path.startsWith('/api/')) {
       res.sendFile(path.join(frontendBuildPath, 'index.html'));
     }
