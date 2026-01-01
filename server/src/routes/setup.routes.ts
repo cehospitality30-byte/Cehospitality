@@ -2,11 +2,12 @@ import express from 'express';
 
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
+import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
 
-const router: express.Router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // Check if admin exists
-router.get('/admin-exists', async (req: express.Request, res: express.Response) => {
+router.get('/admin-exists', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const adminCount = await Admin.countDocuments();
     res.json({ adminExists: adminCount > 0 });
@@ -16,7 +17,7 @@ router.get('/admin-exists', async (req: express.Request, res: express.Response) 
 });
 
 // Create initial admin user (only if no admin exists)
-router.post('/setup', async (req: express.Request, res: express.Response) => {
+router.post('/setup', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     // Check if any admin already exists
     const existingAdmin = await Admin.findOne();

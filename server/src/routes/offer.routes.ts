@@ -1,11 +1,12 @@
 import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
 
 import Offer from '../models/Offer.js';
 
-const router: express.Router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // Get all offers
-router.get('/', async (req: express.Request, res: express.Response) => {
+router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { active } = req.query;
     const query: any = {};
@@ -22,7 +23,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Get single offer
-router.get('/:id', async (req: express.Request, res: express.Response) => {
+router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const offer = await Offer.findById(req.params.id);
     if (!offer) {
@@ -35,7 +36,7 @@ router.get('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Create offer
-router.post('/', async (req: express.Request, res: express.Response) => {
+router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const offer = new Offer(req.body);
     await offer.save();
@@ -46,7 +47,7 @@ router.post('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Update offer
-router.put('/:id', async (req: express.Request, res: express.Response) => {
+router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const offer = await Offer.findByIdAndUpdate(
       req.params.id,
@@ -63,7 +64,7 @@ router.put('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Delete offer
-router.delete('/:id', async (req: express.Request, res: express.Response) => {
+router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const offer = await Offer.findByIdAndDelete(req.params.id);
     if (!offer) {

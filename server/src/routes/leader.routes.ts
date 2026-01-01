@@ -1,12 +1,13 @@
 import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
 
 import Leader from '../models/Leader.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router: express.Router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // Get all leaders
-router.get('/', async (req: express.Request, res: express.Response) => {
+router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const leaders = await Leader.find().sort({ createdAt: -1 });
     res.json(leaders);
@@ -16,7 +17,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Get single leader
-router.get('/:id', async (req: express.Request, res: express.Response) => {
+router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const leader = await Leader.findById(req.params.id);
     if (!leader) {
@@ -29,7 +30,7 @@ router.get('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Create leader
-router.post('/', async (req: express.Request, res: express.Response) => {
+router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     // If there's an image in the request, upload it to Cloudinary
     if (req.body.image && req.body.image.startsWith('data:')) {
@@ -54,7 +55,7 @@ router.post('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Update leader
-router.put('/:id', async (req: express.Request, res: express.Response) => {
+router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     // Handle image update if there's a new image
     if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
@@ -91,7 +92,7 @@ router.put('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Delete leader
-router.delete('/:id', async (req: express.Request, res: express.Response) => {
+router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const leader = await Leader.findById(req.params.id);
     if (!leader) {

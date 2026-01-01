@@ -1,12 +1,13 @@
 import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 
-const router: express.Router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // Admin login
-router.post('/login', async (req: express.Request, res: express.Response) => {
+router.post('/login', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { email, password } = req.body;
 
@@ -51,7 +52,7 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
 });
 
 // Verify token
-router.get('/verify', async (req: express.Request, res: express.Response) => {
+router.get('/verify', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {

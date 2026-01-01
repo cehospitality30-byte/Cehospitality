@@ -1,8 +1,9 @@
 import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
 
 import Booking from '../models/Booking.js';
 
-const router: express.Router = express.Router();
+const router: ExpressRouter = express.Router();
 
 // Get all bookings
 router.get('/', async (req: express.Request, res: express.Response) => {
@@ -26,7 +27,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Get single booking
-router.get('/:id', async (req: express.Request, res: express.Response) => {
+router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const booking = await Booking.findById(req.params.id);
     if (!booking) {
@@ -39,7 +40,7 @@ router.get('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Create booking
-router.post('/', async (req: express.Request, res: express.Response) => {
+router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const booking = new Booking(req.body);
     await booking.save();
@@ -50,7 +51,7 @@ router.post('/', async (req: express.Request, res: express.Response) => {
 });
 
 // Update booking
-router.put('/:id', async (req: express.Request, res: express.Response) => {
+router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
@@ -67,7 +68,7 @@ router.put('/:id', async (req: express.Request, res: express.Response) => {
 });
 
 // Delete booking
-router.delete('/:id', async (req: express.Request, res: express.Response) => {
+router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) {
