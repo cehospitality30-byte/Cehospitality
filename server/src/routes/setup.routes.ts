@@ -1,6 +1,6 @@
-import * as express from 'express';
-import Admin from '../models/Admin.js';
+import express from 'express';
 import { Request, Response, Router } from 'express';
+import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 
 const router: Router = express.Router();

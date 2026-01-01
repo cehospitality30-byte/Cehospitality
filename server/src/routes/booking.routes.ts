@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { Request, Response, Router } from 'express';
 import Booking from '../models/Booking.js';
-import { Router } from 'express';
 
 const router: Router = express.Router();
 

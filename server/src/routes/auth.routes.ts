@@ -1,4 +1,5 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
+import { Request, Response, Router } from 'express';
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';

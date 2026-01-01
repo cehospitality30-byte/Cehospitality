@@ -1,5 +1,5 @@
-import express, { Request, Response } from 'express';
-import { Router } from 'express';
+import express from 'express';
+import { Request, Response, Router } from 'express';
 import { config } from '../config/env.js';
 
 const router: Router = express.Router();

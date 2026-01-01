@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { Request, Response, Router } from 'express';
 import Contact from '../models/Contact.js';
-import { Router } from 'express';
 
 const router: Router = express.Router();
 

@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import { Request, Response, Router } from 'express';
 import Service from '../models/Service.js';
-import { Router } from 'express';
 
 const router: Router = express.Router();
 
