@@ -41,12 +41,15 @@ if (config.nodeEnv === 'production') {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", config.corsOrigin, 'https://www.google.com', 'https://www.gstatic.com'],
-        frameSrc: ["'self'", "https://www.google.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "https:", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.gstatic.com"],
+        connectSrc: ["'self'", config.corsOrigin, 'https://www.google.com', 'https://www.gstatic.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
+        frameSrc: ["'self'", "https://www.google.com", "https://www.google.com/maps/embed"],
         objectSrc: ["'none'"],
+        childSrc: ["'self'", "https://www.google.com", "https://www.google.com/maps/embed"],
+        workerSrc: ["'self'", "blob:"],
       },
     },
   }));
@@ -56,12 +59,15 @@ if (config.nodeEnv === 'production') {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'", "http://localhost:8080", "http://localhost:5000"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000"],
-        styleSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000"],
-        imgSrc: ["'self'", "data:", "https:", "http://localhost:8080", "http://localhost:5000"],
-        connectSrc: ["'self'", "http://localhost:8080", "http://localhost:5000", "https://www.google.com", "https://www.gstatic.com"],
-        frameSrc: ["'self'", "https://www.google.com", "http://localhost:8080"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "http://localhost:8080", "http://localhost:5000", "https://fonts.googleapis.com", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "https:", "http://localhost:8080", "http://localhost:5000", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.gstatic.com"],
+        connectSrc: ["'self'", "http://localhost:8080", "http://localhost:5000", "https://www.google.com", "https://www.gstatic.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        frameSrc: ["'self'", "https://www.google.com", "http://localhost:8080", "https://www.google.com/maps/embed"],
         objectSrc: ["'none'"],
+        childSrc: ["'self'", "https://www.google.com", "https://www.google.com/maps/embed"],
+        workerSrc: ["'self'", "blob:"],
       },
     },
   }));
@@ -76,10 +82,18 @@ if (config.nodeEnv === 'production') {
 }
 
 // CORS middleware
-app.use(cors({
-  origin: config.corsOrigin,
-  credentials: true,
-}));
+if (config.nodeEnv === 'production') {
+  app.use(cors({
+    origin: config.corsOrigin,
+    credentials: true,
+  }));
+} else {
+  // In development, allow requests from the frontend dev server
+  app.use(cors({
+    origin: ['http://localhost:8080', 'http://localhost:5173', 'http://127.0.0.1:8080', 'http://127.0.0.1:5173'],
+    credentials: true,
+  }));
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -124,9 +138,15 @@ app.use((err: any, req: ExpressRequest, res: ExpressResponse, next: ExpressNextF
 
 // Serve static files from the React app build directory (only in production)
 if (config.nodeEnv === 'production') {
+  // Determine the correct path for frontend files
+  // If running from compiled build (server/dist), use __dirname
+  // If running from source (server/src), use server/dist
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const frontendBuildPath = path.join(__dirname, '../../dist');
+  
+  // Check if we're in the source directory (contains index.ts) or build directory
+  const isSrcDir = path.basename(__dirname) === 'src';
+  const frontendBuildPath = isSrcDir ? path.join(__dirname, '../dist') : __dirname; // Use server/dist if running from src
 
   app.use(express.static(frontendBuildPath));
 

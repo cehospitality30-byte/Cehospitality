@@ -5,7 +5,7 @@
     "lib": ["ES2022"],
     "moduleResolution": "node16",
     "rootDir": "./src",
-    "outDir": "../dist/server",  /* Output to root dist/server so both frontend and backend are in the same dist folder */
+    "outDir": "./dist",  /* Output server code to same directory as frontend */
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
