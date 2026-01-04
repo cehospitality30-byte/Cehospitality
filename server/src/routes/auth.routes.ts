@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { Router } from 'express';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Admin login
 router.post('/login', async (req: ExpressRequest, res: ExpressResponse) => {

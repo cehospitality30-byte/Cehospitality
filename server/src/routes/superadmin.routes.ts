@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
@@ -10,7 +10,7 @@ interface JwtPayload {
   role: string;
 }
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Create super admin (only first super admin can be created without authentication)
 router.post('/superadmin', async (req: ExpressRequest, res: ExpressResponse) => {

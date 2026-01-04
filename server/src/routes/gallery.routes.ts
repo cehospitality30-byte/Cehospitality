@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Router } from 'express';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import GalleryImage from '../models/GalleryImage.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Get all gallery images
 router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {

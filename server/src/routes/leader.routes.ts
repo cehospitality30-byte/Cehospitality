@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { Router } from 'express';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import Leader from '../models/Leader.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Get all leaders
 router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {

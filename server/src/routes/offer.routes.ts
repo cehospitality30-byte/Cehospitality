@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Router } from 'express';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import Offer from '../models/Offer.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Get all offers
 router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
