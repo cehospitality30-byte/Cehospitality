@@ -1,14 +1,13 @@
-import express from 'express';
-import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
+import express, { Request, Response, Router } from 'express';
 
 import MenuItem from '../models/MenuItem.js';
 import cloudinary from '../config/cloudinary.js';
 import { config } from '../config/env.js';
 
-const router: ExpressRouter = express.Router();
+const router: Router = express.Router();
 
 // Get all menu items
-router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { category, search } = req.query;
     const query: any = {};
@@ -29,7 +28,7 @@ router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Get single menu item
-router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const item = await MenuItem.findById(req.params.id);
     if (!item) {
@@ -42,7 +41,7 @@ router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Create menu item
-router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     // If there's an image in the request, upload it to Cloudinary
     if (req.body.image && req.body.image.startsWith('data:')) {
@@ -67,7 +66,7 @@ router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Update menu item
-router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     // Handle image update if there's a new image
     if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
@@ -104,7 +103,7 @@ router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Delete menu item
-router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const item = await MenuItem.findById(req.params.id);
     if (!item) {

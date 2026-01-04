@@ -5,7 +5,7 @@ interface Config {
   port: number;
   nodeEnv: string;
   mongoUri: string;
-  corsOrigin: string;
+  corsOrigin: string | string[];
   jwtSecret: string;
   cloudinary: {
     cloudName: string;
@@ -20,11 +20,17 @@ const getHardcodedValue = (key: string): string => {
     'PORT': '5000',
     'NODE_ENV': 'production',
     'MONGODB_URI': 'mongodb+srv://babu789387_db_user:676F1gc3Ivb9hwXq@cluster0.64ute6w.mongodb.net/CAHospility?retryWrites=true&w=majority&tls=true&tlsInsecure=false&appName=Cluster0',
-    'CORS_ORIGIN': 'https://cehospitalitygroup.com',
     'JWT_SECRET': 'very-long-and-secure-jwt-secret-key-that-should-be-at-least-32-characters-long-and-complex',
     'CLOUDINARY_URL': 'cloudinary://916839593194141:5z6mCB5AZ_TBIkQevRMGCojZPE4@djieycmly',
   };
   return hardcodedValues[key] || '';
+};
+
+const getHardcodedArrayValue = (key: string): string | string[] => {
+  const hardcodedArrayValues: Record<string, string | string[]> = {
+    'CORS_ORIGIN': ['https://cehospitalitygroup.com', 'https://www.cehospitalitygroup.com'],
+  };
+  return hardcodedArrayValues[key] || '';
 };
 
 // Parse hardcoded CLOUDINARY_URL
@@ -59,7 +65,7 @@ const createConfig = (): Config => {
     port: parseInt(getHardcodedValue('PORT') || '5000', 10),
     nodeEnv: getHardcodedValue('NODE_ENV'),
     mongoUri: getHardcodedValue('MONGODB_URI'),
-    corsOrigin: getHardcodedValue('CORS_ORIGIN'),
+    corsOrigin: getHardcodedArrayValue('CORS_ORIGIN') as string | string[],
     jwtSecret: getHardcodedValue('JWT_SECRET'),
     cloudinary: {
       cloudName: cloudinaryUrlConfig?.cloudName || '',

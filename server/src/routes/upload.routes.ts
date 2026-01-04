@@ -1,11 +1,10 @@
-import express from 'express';
-import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
+import express, { Request, Response, Router } from 'express';
 import cloudinary from '../config/cloudinary.js';
 
-const router: ExpressRouter = express.Router();
+const router: Router = express.Router();
 
 // Upload image to Cloudinary
-router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     if (!req.body.image) {
       return res.status(400).json({ error: 'No image provided' });

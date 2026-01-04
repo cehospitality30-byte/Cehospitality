@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://cehospitalitygroup.com/api');
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
 
 // Generic API request function
 async function apiRequest<T>(
@@ -6,10 +6,10 @@ async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   // Get token from localStorage
   const token = localStorage.getItem('token');
-  
+
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ async function apiRequest<T>(
   };
 
   const response = await fetch(url, config);
-  
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
@@ -33,11 +33,11 @@ async function apiRequest<T>(
 export async function uploadImageToCloudinary(file: File, entityType: 'menu' | 'gallery' | 'leaders' | 'uploads' = 'uploads'): Promise<{ url: string, publicId: string }> {
   // Convert file to base64
   const reader = new FileReader();
-  
+
   return new Promise((resolve, reject) => {
     reader.onload = async () => {
       const base64Image = reader.result as string;
-      
+
       // Upload to backend which will handle Cloudinary upload
       try {
         const result: any = await apiRequest('/upload', {
@@ -49,11 +49,11 @@ export async function uploadImageToCloudinary(file: File, entityType: 'menu' | '
         reject(error);
       }
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file'));
     };
-    
+
     reader.readAsDataURL(file);
   });
 }

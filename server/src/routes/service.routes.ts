@@ -1,12 +1,11 @@
-import express from 'express';
-import type { Request as ExpressRequest, Response as ExpressResponse, Router as ExpressRouter } from 'express';
+import express, { Request, Response, Router } from 'express';
 
 import Service from '../models/Service.js';
 
-const router: ExpressRouter = express.Router();
+const router: Router = express.Router();
 
 // Get all services
-router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { active } = req.query;
     const query: any = {};
@@ -23,7 +22,7 @@ router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Get single service
-router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const service = await Service.findById(req.params.id);
     if (!service) {
@@ -36,7 +35,7 @@ router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Create service
-router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const service = new Service(req.body);
     await service.save();
@@ -47,7 +46,7 @@ router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Update service
-router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.put('/:id', async (req: Request, res: Response) => {
   try {
     const service = await Service.findByIdAndUpdate(
       req.params.id,
@@ -64,7 +63,7 @@ router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
 });
 
 // Delete service
-router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const service = await Service.findByIdAndDelete(req.params.id);
     if (!service) {

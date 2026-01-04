@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/lib/api';
 
 const Setup = () => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Setup = () => {
 
     const checkAdminExists = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/setup/admin-exists`);
+            const response = await fetch(`${API_BASE_URL}/setup/admin-exists`);
             const data = await response.json();
 
             if (data.adminExists) {
@@ -49,7 +50,7 @@ const Setup = () => {
         setSubmitting(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/setup/setup`, {
+            const response = await fetch(`${API_BASE_URL}/setup/setup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
