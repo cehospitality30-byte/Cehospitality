@@ -45,7 +45,7 @@ if (config.nodeEnv === 'production') {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
         imgSrc: ["'self'", "data:", "https:", "https://www.google.com", "https://maps.googleapis.com", "https://maps.gstatic.com", "https://www.gstatic.com"],
-        connectSrc: ["'self'", config.corsOrigin, 'https://www.google.com', 'https://www.gstatic.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
+        connectSrc: ["'self'", ...(Array.isArray(config.corsOrigin) ? config.corsOrigin : [config.corsOrigin]), 'https://www.google.com', 'https://www.gstatic.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
         frameSrc: ["'self'", "https://www.google.com", "https://www.google.com/maps/embed"],
         objectSrc: ["'none'"],
         childSrc: ["'self'", "https://www.google.com", "https://www.google.com/maps/embed"],
@@ -143,7 +143,7 @@ if (config.nodeEnv === 'production') {
   // If running from source (server/src), use server/dist
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  
+
   // Check if we're in the source directory (contains index.ts) or build directory
   const isSrcDir = path.basename(__dirname) === 'src';
   const frontendBuildPath = isSrcDir ? path.join(__dirname, '../dist') : __dirname; // Use server/dist if running from src
