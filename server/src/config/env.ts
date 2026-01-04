@@ -1,7 +1,6 @@
-// Hardcoded configuration values
+// Environment configuration with proper fallbacks
 
-
-interface Config {
+export interface Config {
   port: number;
   nodeEnv: string;
   mongoUri: string;
@@ -14,63 +13,72 @@ interface Config {
   };
 }
 
-// Hardcoded values instead of environment variables
-const getHardcodedValue = (key: string): string => {
-  const hardcodedValues: Record<string, string> = {
-    'PORT': '5000',
-    'NODE_ENV': 'production',
-    'MONGODB_URI': 'mongodb+srv://babu789387_db_user:676F1gc3Ivb9hwXq@cluster0.64ute6w.mongodb.net/CAHospility?retryWrites=true&w=majority&tls=true&tlsInsecure=false&appName=Cluster0',
-    'JWT_SECRET': 'very-long-and-secure-jwt-secret-key-that-should-be-at-least-32-characters-long-and-complex',
-    'CLOUDINARY_URL': 'cloudinary://916839593194141:5z6mCB5AZ_TBIkQevRMGCojZPE4@djieycmly',
-  };
-  return hardcodedValues[key] || '';
+// Helper to get environment variable with fallback
+const getEnvVar = (key: string, fallback: string = ''): string => {
+  return process.env[key] || fallback;
 };
 
-const getHardcodedArrayValue = (key: string): string | string[] => {
-  const hardcodedArrayValues: Record<string, string | string[]> = {
-    'CORS_ORIGIN': ['https://cehospitalitygroup.com', 'https://www.cehospitalitygroup.com'],
-  };
-  return hardcodedArrayValues[key] || '';
+// Helper to parse CORS origins (can be comma-separated string or array)
+const parseCorsOrigin = (): string | string[] => {
+  const envValue = getEnvVar('CORS_ORIGIN');
+
+  if (envValue) {
+    // If contains comma, split into array
+    if (envValue.includes(',')) {
+      return envValue.split(',').map(origin => origin.trim());
+    }
+    return envValue;
+  }
+
+  // Fallback for production
+  return ['https://cehospitalitygroup.com', 'https://www.cehospitalitygroup.com'];
 };
 
-// Parse hardcoded CLOUDINARY_URL
-const parseCloudinaryUrl = (): { cloudName: string; apiKey: string; apiSecret: string } | null => {
-  const url = getHardcodedValue('CLOUDINARY_URL');
+// Parse Cloudinary URL (format: cloudinary://apiKey:apiSecret@cloudName)
+const parseCloudinaryUrl = (url: string): { cloudName: string; apiKey: string; apiSecret: string } | null => {
   if (!url) return null;
-  
+
   try {
-    // Parse URL format: cloudinary://apiKey:apiSecret@cloudName
-    const match = url.match(new RegExp('^cloudinary://([^:]+):([^@]+)@(.+)$'));
+    const match = url.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
     if (match) {
-      const result = {
-        cloudName: match[3],
+      return {
         apiKey: match[1],
-        apiSecret: match[2]
+        apiSecret: match[2],
+        cloudName: match[3],
       };
-      return result;
     }
   } catch (error) {
     console.error('Error parsing CLOUDINARY_URL:', error);
   }
-  
+
   return null;
 };
 
-// Create configuration with hardcoded values
+// Create configuration
 const createConfig = (): Config => {
-  // Try to get Cloudinary config from hardcoded CLOUDINARY_URL first
-  const cloudinaryUrlConfig = parseCloudinaryUrl();
-  
+  // Parse Cloudinary config
+  const cloudinaryUrl = getEnvVar(
+    'CLOUDINARY_URL',
+    'cloudinary://916839593194141:5z6mCB5AZ_TBIkQevRMGCojZPE4@djieycmly'
+  );
+  const cloudinaryConfig = parseCloudinaryUrl(cloudinaryUrl);
+
   const config: Config = {
-    port: parseInt(getHardcodedValue('PORT') || '5000', 10),
-    nodeEnv: getHardcodedValue('NODE_ENV'),
-    mongoUri: getHardcodedValue('MONGODB_URI'),
-    corsOrigin: getHardcodedArrayValue('CORS_ORIGIN') as string | string[],
-    jwtSecret: getHardcodedValue('JWT_SECRET'),
+    port: parseInt(getEnvVar('PORT', '5000'), 10),
+    nodeEnv: getEnvVar('NODE_ENV', 'development'),
+    mongoUri: getEnvVar(
+      'MONGODB_URI',
+      'mongodb+srv://babu789387_db_user:676F1gc3Ivb9hwXq@cluster0.64ute6w.mongodb.net/CAHospility?retryWrites=true&w=majority&tls=true&tlsInsecure=false&appName=Cluster0'
+    ),
+    corsOrigin: parseCorsOrigin(),
+    jwtSecret: getEnvVar(
+      'JWT_SECRET',
+      'very-long-and-secure-jwt-secret-key-that-should-be-at-least-32-characters-long-and-complex'
+    ),
     cloudinary: {
-      cloudName: cloudinaryUrlConfig?.cloudName || '',
-      apiKey: cloudinaryUrlConfig?.apiKey || '',
-      apiSecret: cloudinaryUrlConfig?.apiSecret || '',
+      cloudName: cloudinaryConfig?.cloudName || '',
+      apiKey: cloudinaryConfig?.apiKey || '',
+      apiSecret: cloudinaryConfig?.apiSecret || '',
     },
   };
 
