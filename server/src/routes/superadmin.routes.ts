@@ -1,4 +1,5 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import { config } from '../config/env.js';
@@ -9,10 +10,10 @@ interface JwtPayload {
   role: string;
 }
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Create super admin (only first super admin can be created without authentication)
-router.post('/superadmin', async (req: Request, res: Response) => {
+router.post('/superadmin', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { email, password, name } = req.body;
 
@@ -62,7 +63,7 @@ router.post('/superadmin', async (req: Request, res: Response) => {
 });
 
 // Create admin (only super admin can do this)
-router.post('/admin', async (req: Request, res: Response) => {
+router.post('/admin', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -114,7 +115,7 @@ router.post('/admin', async (req: Request, res: Response) => {
 });
 
 // Get all admins (only super admin can do this)
-router.get('/admins', async (req: Request, res: Response) => {
+router.get('/admins', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -141,7 +142,7 @@ router.get('/admins', async (req: Request, res: Response) => {
 });
 
 // Delete admin (only super admin can do this)
-router.delete('/admin/:id', async (req: Request, res: Response) => {
+router.delete('/admin/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {

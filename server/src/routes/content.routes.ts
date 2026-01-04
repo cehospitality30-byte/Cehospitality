@@ -1,11 +1,12 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 
 import Content from '../models/Content.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all content
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { section } = req.query;
     const query: any = {};
@@ -22,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get content by section
-router.get('/section/:section', async (req: Request, res: Response) => {
+router.get('/section/:section', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const contents = await Content.find({ section: req.params.section });
     const contentMap: Record<string, string> = {};
@@ -36,7 +37,7 @@ router.get('/section/:section', async (req: Request, res: Response) => {
 });
 
 // Update or create content
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { section, key, value } = req.body;
 
@@ -53,7 +54,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Bulk update content
-router.put('/bulk', async (req: Request, res: Response) => {
+router.put('/bulk', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { section, data } = req.body;
 

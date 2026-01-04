@@ -1,11 +1,12 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import GalleryImage from '../models/GalleryImage.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Get all gallery images
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const { category } = req.query;
     const query: any = {};
@@ -22,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Get single image
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const image = await GalleryImage.findById(req.params.id);
     if (!image) {
@@ -35,7 +36,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create image
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     // If there's a file in the request, upload it to Cloudinary
     if (req.body.image && req.body.image.startsWith('data:')) {
@@ -60,7 +61,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update image
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     // Handle image update if there's a new image
     if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:')) {
@@ -97,7 +98,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete image
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: ExpressRequest, res: ExpressResponse) => {
   try {
     const image = await GalleryImage.findById(req.params.id);
     if (!image) {
