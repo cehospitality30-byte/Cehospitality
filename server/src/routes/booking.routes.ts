@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 import Booking from '../models/Booking.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all bookings
 router.get('/', async (req: Request, res: Response) => {

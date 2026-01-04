@@ -9,7 +9,7 @@ interface JwtPayload {
   role: string;
 }
 
-const router = Router();
+const router: Router = Router();
 
 // Create super admin (only first super admin can be created without authentication)
 router.post('/superadmin', async (req: Request, res: Response) => {

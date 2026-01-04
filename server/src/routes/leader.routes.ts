@@ -3,7 +3,7 @@ import express, { Request, Response, Router } from 'express';
 import Leader from '../models/Leader.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all leaders
 router.get('/', async (req: Request, res: Response) => {

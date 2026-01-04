@@ -3,7 +3,7 @@ import express, { Request, Response, Router } from 'express';
 import Admin from '../models/Admin.js';
 import jwt from 'jsonwebtoken';
 
-const router = Router();
+const router: Router = Router();
 
 // Check if admin exists
 router.get('/admin-exists', async (req: Request, res: Response) => {

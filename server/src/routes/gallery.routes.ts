@@ -2,7 +2,7 @@ import express, { Request, Response, Router } from 'express';
 import GalleryImage from '../models/GalleryImage.js';
 import cloudinary from '../config/cloudinary.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all gallery images
 router.get('/', async (req: Request, res: Response) => {

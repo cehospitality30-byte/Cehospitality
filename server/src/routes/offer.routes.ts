@@ -2,7 +2,7 @@ import express, { Request, Response, Router } from 'express';
 
 import Offer from '../models/Offer.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all offers
 router.get('/', async (req: Request, res: Response) => {

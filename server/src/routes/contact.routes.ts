@@ -2,7 +2,7 @@ import express, { Request, Response, Router } from 'express';
 
 import Contact from '../models/Contact.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all contacts
 router.get('/', async (req: Request, res: Response) => {

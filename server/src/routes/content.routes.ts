@@ -2,7 +2,7 @@ import express, { Request, Response, Router } from 'express';
 
 import Content from '../models/Content.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Get all content
 router.get('/', async (req: Request, res: Response) => {
