@@ -1,5 +1,4 @@
-import express from 'express';
-import type { Application as ExpressApplication, Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -23,7 +22,7 @@ import healthRoutes from './routes/health.routes.js';
 import superadminRoutes from './routes/superadmin.routes.js';
 import authRoutes from './routes/auth.routes.js';
 
-const app: ExpressApplication = express();
+const app: Application = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : config.port;
 const IS_PRODUCTION = config.nodeEnv === 'production';
 const IS_DEVELOPMENT = !IS_PRODUCTION;
@@ -108,7 +107,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ============================================================================
 
 if (IS_PRODUCTION) {
-  app.use(async (req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
+  app.use(async (req: Request, res: Response, next: NextFunction) => {
     try {
       await connectDB();
     } catch (error) {
@@ -123,7 +122,7 @@ if (IS_PRODUCTION) {
 // ============================================================================
 
 // Health check (before other routes)
-app.get('/health', (req: ExpressRequest, res: ExpressResponse) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
@@ -169,7 +168,7 @@ if (IS_PRODUCTION) {
   }));
 
   // SPA fallback - serve index.html for all non-API, non-asset routes
-  app.get('*', (req: ExpressRequest, res: ExpressResponse) => {
+  app.get('*', (req: Request, res: Response) => {
     // Don't serve index.html for API routes or static assets
     if (req.path.startsWith('/api/') ||
       req.path.startsWith('/assets/') ||
@@ -186,12 +185,12 @@ if (IS_PRODUCTION) {
 // ============================================================================
 
 // 404 handler for API routes
-app.use('/api/*', (req: ExpressRequest, res: ExpressResponse) => {
+app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
 // Global error handler
-app.use((err: any, req: ExpressRequest, res: ExpressResponse, next: ExpressNextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Error:', err.stack);
 
   const statusCode = err.statusCode || 500;
